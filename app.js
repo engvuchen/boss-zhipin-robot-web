@@ -1,17 +1,16 @@
 const fs = require('fs');
+const http = require('http');
 const Koa = require('koa');
 const logger = require('koa-logger');
 // const koaBody = require('koa-body');
 const router = require('@koa/router')();
-const WebSocket = require('ws');
+const { WebSocket } = require('ws');
 
 const { main: autoSayHello, logs } = require('boss-zhipin-robot-core');
-// const WebSocketApi = require('./socket');
 
 const isDev = process.env.NODE_ENV !== 'production';
 
 const app = new Koa();
-let wss;
 app.use(logger());
 // todo 可以搞一个中间件
 app.use(async (ctx, next) => {
@@ -36,40 +35,62 @@ router.get('/', ctx => {
     // ctx.body = fs.readFileSync('index.html');
   }
 });
-router.get('/open-ws', ctx => {
-  // wss = new WebSocket.Server({ port: 3000, path: '/socket' });
-  wss = new WebSocket.Server({ server });
-  // wss = new WebSocket('ws://127.0.0.1:3000/socket');
-  ctx.body = { code: 0, msg: 'ok' };
-});
 router.post('/send', async ctx => {
   let postData = await parsePostData(ctx);
   postData.queryParams = handleQueryStr(postData.queryParams); // string => obj
 
-  console.log('🔎 ~ file: app.js:48 ~ postData:', postData);
-
   await autoSayHello(postData);
-
-  logs.push = function mutator(...args) {
-    console.log('logs', args);
-    wss.send(`${args}`, err => {
-      if (err) console.log('🔎 ~ file: socket.js:16 ~ err:', err);
-    });
-    [].push.apply(this, args);
-  };
 
   ctx.body = { code: 0, msg: 'ok' };
 });
-
 app.use(router.routes());
-const server = app.listen(3000); // todo
+
+let wss = new WebSocket.Server({ clientTracking: false, noServer: true });
+const server = http.createServer(app.callback());
+// const server = http.createServer(app);
+// 服务器触发了 upgrade 事件，才触发 socket；upgrade 是由客户端请求触发的吗？
+server.on('upgrade', function (request, socket, head) {
+  wss.handleUpgrade(request, socket, head, function (ws) {
+    wss.emit('connection', ws, request);
+  });
+});
+server.listen(3000);
+// wss.once('connection', function (ws) { });
+let subscribeLogs;
+wss.on('connection', function (ws, request) {
+  console.log('成功连接');
+  subscribeLogs = txt => {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(txt);
+    }
+  };
+});
+logs.push = function mutator(txt) {
+  if (typeof subscribeLogs !== 'function') {
+    return console.error('客户端未连接，请刷新页面');
+  }
+
+  subscribeLogs(txt); // 利用闭包实现手动发消息
+  // [].push.apply(this, [txt]);
+};
 
 function handleQueryStr(url) {
   let [, queryStr] = url.split('?');
-  // xx=11&b=222
+  // a=11&b=222
   let queryObj = {};
   queryStr.split('&').map(currStr => {
     let [key, val] = currStr.split('=');
+
+    switch (key) {
+      case 'page':
+        val = Number(val);
+        break;
+      case 'query':
+        val = decodeURIComponent(val);
+        break;
+      default:
+        break;
+    }
     queryObj[key] = val;
   });
   return queryObj;
@@ -107,4 +128,9 @@ function parseQueryStr(queryStr) {
     queryData[itemList[0]] = decodeURIComponent(itemList[1]);
   }
   return queryData;
+}
+function sleep(time = 1000) {
+  return new Promise((resolve, reject) => {
+    setTimeout(resolve, time);
+  });
 }

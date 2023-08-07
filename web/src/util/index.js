@@ -11,7 +11,7 @@ function request({
   headers = {},
   data = {},
   onprogress = () => {},
-  timeout = 1000,
+  timeout = 0,
   ontimeout = () => {},
 }) {
   return new Promise((resolve, reject) => {
@@ -48,8 +48,6 @@ function request({
     xhr.send(sendData);
     xhr.onload = () => {
       let res = JSON.parse(xhr?.response || '{}');
-      console.log('🔎 ~ file: index.js:42 ~ returnnewPromise ~ xhr?.response:', xhr?.response);
-
       if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
         return resolve(res);
       } else {

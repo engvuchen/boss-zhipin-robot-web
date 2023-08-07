@@ -25,9 +25,9 @@
         />
       </n-form-item>
       <n-form-item path="helloTxt" label="招呼语">
-        <n-input v-model:value="modelRef.helloTxt" type="textarea" @keydown.enter.prevent />
+        <n-input v-model:value="modelRef.helloTxt" type="textarea" style="height: 8rem" @keydown.enter.prevent />
       </n-form-item>
-      <n-form-item path="wt2Cookie" label="cookie（wt2）" feedback="登陆后手动获取 Cookie 中的 wt2 部分">
+      <n-form-item path="wt2Cookie" label="Cookie（wt2）" feedback="登陆后手动获取 Cookie 中的 wt2 部分">
         <n-input v-model:value="modelRef.wt2Cookie" type="textarea" @keydown.enter.prevent />
       </n-form-item>
       <n-form-item path="excludeCompanies" label="屏蔽公司关键词">
@@ -208,14 +208,23 @@ const modelRef = cacheMoRef
       excludeCompanies: defaultExcludeCompanies,
       excludeJobs: ['外包', '派遣'],
     });
+let waitAutoSendHello = ref(false);
 const btnDisabled = computed(() => {
-  return requiredNames.some(key => isFake(modelRef.value[key]));
+  return requiredNames.some(key => isFake(modelRef.value[key])) || waitAutoSendHello.value;
 });
 const messageList = ref([]);
 const messageListStr = computed(() => {
-  return messageList.join('\n');
+  return messageList.value.join('\n');
 });
 
+// 此处 new ，触发一次 wss connection
+let wss = new WebSocket('ws://127.0.0.1:3000');
+wss.onopen = function (event) {
+  console.log('WebSocket is open now.');
+};
+wss.onmessage = event => {
+  messageList.value.push(event.data);
+};
 async function handleValidateButtonClick(e) {
   e.preventDefault();
   let validErr = await formRef.value?.validate(async errors => {
@@ -229,29 +238,19 @@ async function handleValidateButtonClick(e) {
     return message.error('验证失败');
   }
 
-  let wsRes = await request({
-    url: '/open-ws',
-  });
-  console.log('🔎 ~ file: Main.vue:235 ~ handleValidateButtonClick ~ wsRes:', wsRes);
-  if (wsRes.code !== 0) {
-    return message.error(wsRes.msg);
-  }
-
   let sendData = JSON.parse(JSON.stringify(modelRef._value));
   localStorage.setItem('zhipin-robot', JSON.stringify(sendData));
 
-  let ws = new WebSocket('ws://127.0.0.1:3000/socket');
-
+  waitAutoSendHello.value = true;
   let res = await request({
     url: '/send',
     method: 'POST',
     data: sendData,
   });
-  ws.on('message', function (msg) {
-    messageList.unshift(msg);
-  });
-  if (res.code !== 200) {
-    return message.error(res.msg);
+  waitAutoSendHello.value = false;
+
+  if (res?.code !== 0) {
+    return message.error(res?.msg || '');
   }
 }
 </script>
