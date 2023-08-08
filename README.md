@@ -4,7 +4,9 @@
 
 使用：
 
-1. 执行 `npm start`；
+1. 安装依赖 `npm ci`；
+
+1. 启动项目 `npm start`；
 
 2. 获取查询参数：在 BOSS 岗位市场页面（https://www.zhipin.com/web/geek/job）进行筛选后，筛选参数会同步到地址栏，复制这个地址栏链接。
 

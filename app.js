@@ -85,7 +85,7 @@ server.on('upgrade', function (request, socket, head) {
   });
 });
 server.listen(3000);
-openUrl(`http://localhost:${isDev ? 3000 : 5173}`);
+openUrl(`http://localhost:${isDev ? 5173 : 3000}`);
 
 // wss.once('connection', function (ws) { });
 let subscribeLogs;
