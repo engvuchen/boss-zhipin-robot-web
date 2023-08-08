@@ -12,8 +12,8 @@
     >
       <n-form-item
         path="queryParams"
-        label="查询参数"
-        feedback="在市场页面（https://www.zhipin.com/web/geek/job）进行筛选后，筛选参数同步到地址栏，拷贝地址栏链接"
+        label="查询链接"
+        feedback="默认参数为：前端开发工程师 / 1-3年经验 / 薪资待遇10-20K / 学历要求本科；链接出处见（）"
       >
         <n-input v-model:value="modelRef.queryParams" type="textarea" @keydown.enter.prevent />
       </n-form-item>
@@ -200,7 +200,8 @@ const formRef = ref(null);
 const modelRef = cacheMoRef
   ? ref(JSON.parse(cacheMoRef))
   : ref({
-      queryParams: 'https://www.zhipin.com/web/geek/job?page=1',
+      queryParams:
+        'https://www.zhipin.com/web/geek/job?query=%E5%89%8D%E7%AB%AF%E5%BC%80%E5%8F%91%E5%B7%A5%E7%A8%8B%E5%B8%88&city=101280600&experience=104&degree=203&salary=405&page=1',
       targetNum: 2,
       helloTxt:
         '面试官您好！看到贵司在前端工程师的岗位，而我过往经历中，有1年小程序开发经验，2年管理端开发经验，我的过往经历跟贵司的匹配度是非常高的。而我目前已经离职，最快到岗时间是一周以内，非常期待贵司能给我一个面试机会，展示一下自己。若您对我的微简历有什么疑问，我随时在线解答。',
@@ -243,7 +244,7 @@ async function handleValidateButtonClick(e) {
 
   waitAutoSendHello.value = true;
   let res = await request({
-    url: '/send',
+    url: '/api/send',
     method: 'POST',
     data: sendData,
   });

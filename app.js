@@ -1,18 +1,21 @@
-const fs = require('fs');
+const fs = require('fs/promises');
+const path = require('path');
 const http = require('http');
 const Koa = require('koa');
 const logger = require('koa-logger');
 // const koaBody = require('koa-body');
 const router = require('@koa/router')();
 const { WebSocket } = require('ws');
-
 const { main: autoSayHello, logs } = require('boss-zhipin-robot-core');
+const { parseMime, getContent, openUrl, handleQueryStr, parsePostData } = require('./util');
 
 const isDev = process.env.NODE_ENV !== 'production';
+const staticPath = 'dist';
 
 const app = new Koa();
 app.use(logger());
-// todo 可以搞一个中间件
+// todo 改为中间件
+// 处理跨域
 app.use(async (ctx, next) => {
   ctx.set('Access-Control-Allow-Origin', '*');
   ctx.set(
@@ -26,24 +29,51 @@ app.use(async (ctx, next) => {
   await next();
 });
 
-router.get('/', ctx => {
+// 处理路由
+router.get('/', async ctx => {
   ctx.set('content-type', 'text/html');
   if (isDev) {
-    console.log('return html');
     ctx.redirect('http://127.0.0.1:5173');
   } else {
-    // ctx.body = fs.readFileSync('index.html');
+    ctx.body = await fs.readFile(`${__dirname}/dist/index.html`);
   }
 });
-router.post('/send', async ctx => {
+router.post('/api/send', async (ctx, next) => {
   let postData = await parsePostData(ctx);
   postData.queryParams = handleQueryStr(postData.queryParams); // string => obj
-
   await autoSayHello(postData);
-
   ctx.body = { code: 0, msg: 'ok' };
 });
 app.use(router.routes());
+
+// 处理静态资源
+app.use(async (ctx, next) => {
+  console.log('ctx.path', ctx.path);
+
+  if (ctx.path.startsWith('/api')) return await next();
+
+  if (!['HEAD', 'GET'].includes(ctx.method)) {
+    return await next();
+  }
+  let fullStaticPath = path.join(__dirname, staticPath);
+
+  // 获取静态资源内容，文件内容，目录，或404
+  let content = await getContent(ctx, fullStaticPath); // 请求到了这里没有走路由. getContent 又拼接 /dist + ctx.url，相当于所有请求都尝试找资源
+  let mime = parseMime(ctx.url);
+  if (mime) ctx.type = mime;
+  // 输出静态资源内容
+  if (mime.indexOf('image/') >= 0) {
+    // 如果是图片，则用node原生res，输出二进制数据
+    ctx.res.writeHead(200);
+    ctx.res.write(content, 'binary');
+    ctx.res.end();
+  } else {
+    // 其他则输出文本
+    ctx.body = content;
+  }
+
+  await next();
+});
 
 let wss = new WebSocket.Server({ clientTracking: false, noServer: true });
 const server = http.createServer(app.callback());
@@ -55,6 +85,8 @@ server.on('upgrade', function (request, socket, head) {
   });
 });
 server.listen(3000);
+openUrl(`http://localhost:${isDev ? 3000 : 5173}`);
+
 // wss.once('connection', function (ws) { });
 let subscribeLogs;
 wss.on('connection', function (ws, request) {
@@ -69,68 +101,6 @@ logs.push = function mutator(txt) {
   if (typeof subscribeLogs !== 'function') {
     return console.error('客户端未连接，请刷新页面');
   }
-
   subscribeLogs(txt); // 利用闭包实现手动发消息
   // [].push.apply(this, [txt]);
 };
-
-function handleQueryStr(url) {
-  let [, queryStr] = url.split('?');
-  // a=11&b=222
-  let queryObj = {};
-  queryStr.split('&').map(currStr => {
-    let [key, val] = currStr.split('=');
-
-    switch (key) {
-      case 'page':
-        val = Number(val);
-        break;
-      case 'query':
-        val = decodeURIComponent(val);
-        break;
-      default:
-        break;
-    }
-    queryObj[key] = val;
-  });
-  return queryObj;
-}
-// 获取 post body 数据；预设是 formData 传送过来的
-function parsePostData(ctx) {
-  return new Promise((resolve, reject) => {
-    try {
-      let postData = '';
-      ctx.req.addListener('data', data => {
-        postData += data;
-      });
-      ctx.req.addListener('end', function () {
-        // let parseData = parseQueryStr(postData);
-
-        // console.log('🔎 ~ file: app.js:82 ~ postData:', postData, typeof postData);
-
-        let parseData = JSON.parse(postData);
-        resolve(parseData);
-      });
-    } catch (err) {
-      reject(err);
-    }
-  });
-}
-// 将POST请求参数字符串解析成JSON
-// 表单数据和 application/json 不一样？
-function parseQueryStr(queryStr) {
-  let queryData = {};
-  let queryStrList = queryStr.split('&');
-  console.log(queryStrList);
-
-  for (let [index, queryStr] of queryStrList.entries()) {
-    let itemList = queryStr.split('=');
-    queryData[itemList[0]] = decodeURIComponent(itemList[1]);
-  }
-  return queryData;
-}
-function sleep(time = 1000) {
-  return new Promise((resolve, reject) => {
-    setTimeout(resolve, time);
-  });
-}
