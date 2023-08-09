@@ -7,9 +7,9 @@
     "lib": "lib"
   },
   "scripts": {
-    "predev": "cd web && npm ci && npm run dev",
-    "dev": "npm ci",
-    "postdev": "node app.js",
+    "init-dev": "(npm i && cd web && npm i) && ((cd web && npm run dev) & node app.js)",
+    "dev": "(cd web && npm run dev) & node app.js",
+    "init-start": "npm i && (cross-env NODE_ENV=production node app.js)",
     "start": "cross-env NODE_ENV=production node app.js"
   },
   "keywords": [],

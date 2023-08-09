@@ -1,26 +1,41 @@
 # boss-zhipin-robot-web
 
+> 希望能在现在的大环境下帮助你找到一份满意的工作。
+
 最近一次 node.js 依赖：`v18.16.0`；
 
-使用：
+## 使用
 
-1. 安装依赖 `npm ci`；
+1. 安装依赖与启动项目 `npm run init-start`；
 
-1. 启动项目 `npm start`；
+2. 获取查询参数：在 [BOSS 岗位市场页面](https://www.zhipin.com/web/geek/job)进行筛选后，筛选参数会同步到地址栏，复制这个地址栏链接。
 
-2. 获取查询参数：在 BOSS 岗位市场页面（https://www.zhipin.com/web/geek/job）进行筛选后，筛选参数会同步到地址栏，复制这个地址栏链接。
+![查询参数](https://engvu.oss-cn-shenzhen.aliyuncs.com/e05a3a8b9f32aa0bec24b49431540e03.webp)
 
-![查询链接](https://engvu.oss-cn-shenzhen.aliyuncs.com/e05a3a8b9f32aa0bec24b49431540e03.webp)
+3. 获取个人 Cookie：
 
-5. 获取个人 Cookie：
+   3.1 先在 BOSS 直聘[登陆页](https://www.zhipin.com/web/user/?ka=header-login)登入个人账号；
 
-   5.1 先在 BOSS 直聘[登陆页](https://www.zhipin.com/web/user/?ka=header-login)登入个人账号；
+   3.2 使用 Chrome 控制台工具， 切换到 Application（应用），点击“存储- Cookie”，获取个人 cookie（wbg）；
 
-   5.2 使用 Chrome 控制台工具， 切换到 Application（应用），点击“存储- Cookie”，获取个人 cookie（wbg）；
+![获取个人Cookie](https://engvu.oss-cn-shenzhen.aliyuncs.com/7a185a08a64782df63119eb61b0ab966.webp)
 
-![image-20230726165716384](https://engvu.oss-cn-shenzhen.aliyuncs.com/7a185a08a64782df63119eb61b0ab966.webp)
+## 调试
 
-本开源项目（以下简称“本项目”）为自由、开放、共享的非赢利性项目，由开发者（以下简称“我们”）所创建并维护。我们不对使用本项目产生的任何后果承担任何责任。
+项目包含服务端工程、网页端工程（web 目录），调试时需分别安装依赖、分别启动项目；
+
+使用以下指令可提高调试效率：
+
+启用格式：`npm run script-name`（bash 终端）
+
+| 指令         | 服务端下载依赖 | 服务端启动 | 网页端下载依赖 | 网页端启动 |
+| ------------ | -------------- | ---------- | -------------- | ---------- |
+| `init-dev`   | 🟩             | 🟩         | 🟩             | 🟩         |
+| `dev`        | ⬜️            | 🟩         | ⬜️            | 🟩         |
+| `init-start` | 🟩             | 🟩         | ⬜️            | ⬜️        |
+| `start`      | ⬜️            | 🟩         | ⬜️            | ⬜️        |
+
+> 注意：`dev`、`start` 使用的端口不同（3000、5173），`localStorage` 保存的位置不同。从 `start` 切换 `dev`，需重新填写一次表单。
 
 ## 免责声名
 
@@ -33,5 +48,3 @@
 本项目中可能包含链接到其他网站或资源的链接。这些链接仅供参考。 我们不对这些网站或资源的可用性、准确性、完整性、合法性或任何其他方面的信息负责。使用者应该自行决定是否信任这些链接，并对因使用这些链接而引发的任何法律责任自负。
 
 我们保留随时更改本免责声明的权利。使用者应该定期查看本免责声明，以了解任何变更。如果使用者继续使用本项目，则视为同意遵守新的免责声明。
-
-> 希望能够在现在的大环境下帮助你找到一份满意的工作。
