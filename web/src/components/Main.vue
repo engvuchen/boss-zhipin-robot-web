@@ -13,9 +13,9 @@
       <n-form-item
         path="queryParams"
         label="查询链接"
-        feedback="默认参数为：前端开发工程师 / 1-3年经验 / 薪资待遇10-20K / 学历要求本科；链接出处见（）"
+        feedback="默认参数为：前端开发工程师 / 1-3年经验 / 薪资待遇10-20K / 学历要求本科；链接出处见 https://github.com/engvuchen/boss-zhipin-robot-web"
       >
-        <n-input v-model:value="modelRef.queryParams" type="textarea" @keydown.enter.prevent />
+        <n-input v-model:value="modelRef.queryParams" type="textarea" />
       </n-form-item>
       <n-form-item path="targetNum" label="打招呼数量" class="">
         <n-input-number
@@ -25,10 +25,10 @@
         />
       </n-form-item>
       <n-form-item path="helloTxt" label="招呼语">
-        <n-input v-model:value="modelRef.helloTxt" type="textarea" style="height: 8rem" @keydown.enter.prevent />
+        <n-input v-model:value="modelRef.helloTxt" type="textarea" style="height: 8rem" />
       </n-form-item>
       <n-form-item path="wt2Cookie" label="Cookie（wt2）" feedback="登陆后手动获取 Cookie 中的 wt2 部分">
-        <n-input v-model:value="modelRef.wt2Cookie" type="textarea" @keydown.enter.prevent />
+        <n-input v-model:value="modelRef.wt2Cookie" type="textarea" />
       </n-form-item>
       <n-form-item path="excludeCompanies" label="屏蔽公司关键词">
         <n-select v-model:value="modelRef.excludeCompanies" filterable multiple tag :options="excludeCompanies" />
@@ -38,8 +38,6 @@
       </n-form-item>
       <div style="display: flex; justify-content: flex-end">
         <n-button round type="primary" :disabled="btnDisabled" @click="handleValidateButtonClick">启动任务</n-button>
-        <!-- <n-input :disabled="btnDisabled" type="textarea" @keydown.enter.prevent /> -->
-        <!-- <button :disabled="btnDisabled">{{ btnDisabled }}</button> -->
       </div>
     </n-form>
 
@@ -61,95 +59,7 @@ import { ref, reactive, computed } from 'vue';
 import { useMessage } from 'naive-ui';
 import { isFake, request } from '@/util';
 const message = useMessage();
-// 默认：不投递大厂、屏蔽部分外包公司关键词
-const defaultExcludeCompanies = [
-  '阿里巴巴',
-  '字节跳动',
-  '今日头条',
-  '网易',
-  '腾讯',
-  '百度',
-  'Shopee',
-  '深圳腾娱互动科技',
-  '人才',
-  '信息技术',
-];
-const excludeCompanies = defaultExcludeCompanies.map(name => ({ label: name, value: name }));
-// 工作名屏蔽
-const excludeJobs = [
-  {
-    label: 'Flutter',
-    value: 'Flutter',
-  },
-  {
-    label: 'flutter',
-    value: 'flutter',
-  },
-  {
-    label: 'shopify',
-    value: 'shopify',
-  },
-  {
-    label: 'React',
-    value: 'React',
-  },
-  {
-    label: 'react',
-    value: 'react',
-  },
-  {
-    label: 'RN',
-    value: 'RN',
-  },
-  {
-    label: 'React Native',
-    value: 'React Native',
-  },
-  {
-    label: 'PHP',
-    value: 'PHP',
-  },
-  {
-    label: 'WordPress',
-    value: 'WordPress',
-  },
-  {
-    label: 'Front End',
-    value: 'Front End',
-  },
-  {
-    label: 'App',
-    value: 'App',
-  },
-  {
-    label: 'Angular',
-    value: 'Angular',
-  },
-  {
-    label: 'angular',
-    value: 'angular',
-  },
-  {
-    label: '混合',
-    value: '混合',
-  },
-  {
-    label: 'uniapp',
-    value: 'uniapp',
-  },
-  {
-    label: '游戏',
-    value: '游戏',
-  },
-  {
-    label: '派遣',
-    value: '派遣',
-  },
-  {
-    label: '外包',
-    value: '外包',
-  },
-];
+import { defaultExcludeCompanies, excludeCompanies, excludeJobs } from './enums';
 const rules = {
   queryParams: [
     {
