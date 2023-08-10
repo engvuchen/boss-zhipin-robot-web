@@ -27,4 +27,4 @@ coverage
 *.sln
 *.sw?
 
-hahPostCompany.txt
+/hasPostCompany.txt
