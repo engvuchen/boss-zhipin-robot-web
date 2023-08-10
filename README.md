@@ -8,6 +8,8 @@
 
 1. 安装依赖与启动项目 `npm run init-start`；
 
+  1.1 若不需要调试，安装依赖后，仅需 `npm run start` 启动服务；
+
 2. 获取查询参数：在 [BOSS 岗位市场页面](https://www.zhipin.com/web/geek/job)进行筛选后，筛选参数会同步到地址栏，复制这个地址栏链接。
 
 ![查询参数](https://engvu.oss-cn-shenzhen.aliyuncs.com/e05a3a8b9f32aa0bec24b49431540e03.webp)
@@ -24,7 +26,10 @@
 
 项目包含服务端工程、网页端工程（web 目录），调试时需分别安装依赖、分别启动项目；
 
-使用以下指令可提高调试效率：
+1. 先进入 web 目录，安装依赖 `npm i`，然后执行 `npm run dev`；
+2. 根目录执行 `node app.js`；
+
+使用以下指令可提高调试效率（mac 自测可用，window 会卡在监听流程）：
 
 启用格式：`npm run script-name`（bash 终端）
 
