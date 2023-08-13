@@ -12,9 +12,10 @@ export default defineConfig({
     {
       name: 'Cleaning assets folder',
       async buildStart() {
-        console.log('🔎 ~ file: vite.config.js:15 ~ buildStart ~ buildStart:');
-
-        await rm(resolve(__dirname, '../dist/assets'), { recursive: true, force: true });
+        console.log('file: vite.config.js:15 ~ buildStart');
+        if (process.env.NODE_ENV === 'production') {
+          await rm(resolve(__dirname, '../dist/assets'), { recursive: true, force: true });
+        }
       },
     },
   ],

@@ -17,6 +17,27 @@
       >
         <n-input v-model:value="modelRef.queryParams" type="textarea" />
       </n-form-item>
+      <!-- todo -->
+      <n-form-item path="salaryRange" label="精确薪资范围" feedback="解决BOSS薪资范围过于粗放的问题">
+        <n-dynamic-input v-model:value="modelRef.salaryRange" :max="1" :min="1">
+          <template #default="{ value }">
+            <div style="display: flex; align-items: center; width: 100%">
+              <n-input-number v-model:value="value.min" style="margin-right: 12px; width: 160px" />
+              <n-input-number v-model:value="value.max" style="margin-right: 12px; width: 160px" />
+            </div>
+          </template>
+        </n-dynamic-input>
+      </n-form-item>
+      <n-form-item path="keySkills" label="精确技能筛选">
+        <n-select
+          v-model:value="modelRef.keySkills"
+          filterable
+          multiple
+          tag
+          :options="keySkills.map(curr => ({ label: curr, value: curr }))"
+        />
+      </n-form-item>
+      <!-- todo -->
       <n-form-item path="targetNum" label="打招呼数量" class="">
         <n-input-number
           v-model:value="modelRef.targetNum"
@@ -34,7 +55,13 @@
         <n-select v-model:value="modelRef.excludeCompanies" filterable multiple tag :options="excludeCompanies" />
       </n-form-item>
       <n-form-item path="excludeJobs" label="屏蔽工作关键词">
-        <n-select v-model:value="modelRef.excludeJobs" filterable multiple tag :options="excludeJobs" />
+        <n-select
+          v-model:value="modelRef.excludeJobs"
+          filterable
+          multiple
+          tag
+          :options="excludeJobs.map(curr => ({ label: curr, value: curr }))"
+        />
       </n-form-item>
       <div style="display: flex; justify-content: flex-end">
         <n-button round type="primary" :disabled="btnDisabled" @click="handleValidateButtonClick">启动任务</n-button>
@@ -59,7 +86,7 @@ import { ref, reactive, computed } from 'vue';
 import { useMessage } from 'naive-ui';
 import { isFake, request } from '@/util';
 const message = useMessage();
-import { defaultExcludeCompanies, excludeCompanies, excludeJobs } from './enums';
+import { keySkills, defaultExcludeCompanies, excludeCompanies, excludeJobs } from './enums';
 const rules = {
   queryParams: [
     {
@@ -113,6 +140,13 @@ const modelRef = cacheMoRef
       queryParams:
         'https://www.zhipin.com/web/geek/job?query=%E5%89%8D%E7%AB%AF%E5%BC%80%E5%8F%91%E5%B7%A5%E7%A8%8B%E5%B8%88&city=101280600&experience=104&degree=203&salary=405&page=1',
       targetNum: 2,
+      salaryRange: [
+        {
+          min: 10,
+          max: 20,
+        },
+      ],
+      keySkills: ['vue'],
       helloTxt:
         '面试官您好！看到贵司在前端工程师的岗位，而我过往经历中，有1年小程序开发经验，2年管理端开发经验，我的过往经历跟贵司的匹配度是非常高的。而我目前已经离职，最快到岗时间是一周以内，非常期待贵司能给我一个面试机会，展示一下自己。若您对我的微简历有什么疑问，我随时在线解答。',
       cookie: '',
@@ -166,9 +200,6 @@ async function handleValidateButtonClick(e) {
 }
 </script>
 <style scoped>
-/* .mr-b-20 {
-  padding-bottom: 40px;
-} */
 .code {
   box-sizing: border-box;
   padding: 10px;

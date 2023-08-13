@@ -7,6 +7,7 @@ import {
   create,
   // component
   NInput,
+  NDynamicInput,
   NInputNumber,
   NSelect,
   NButton,
@@ -16,7 +17,7 @@ import {
 } from 'naive-ui';
 
 const naive = create({
-  components: [NButton, NInput, NInputNumber, NSelect, NMessageProvider, NForm, NFormItem],
+  components: [NButton, NInput, NDynamicInput, NInputNumber, NSelect, NMessageProvider, NForm, NFormItem],
 });
 
 const app = createApp(App);
