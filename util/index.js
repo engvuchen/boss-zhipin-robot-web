@@ -53,28 +53,6 @@ async function getContent(ctx, fullStaticPath) {
     content = await fsPromise.readFile(reqPath);
   }
   return content;
-
-  // if (!exist) {
-  //   //如果请求路径不存在，返回404
-  //   content = '404 Not Found';
-  // } else {
-
-  // }
-
-  // if (!exist) {
-  //   //如果请求路径不存在，返回404
-  //   content = '404 Not Found';
-  // } else {
-  //   //判断访问地址是文件夹还是文件
-  //   let stat = fs.statSync(reqPath);
-  //   if (stat.isDirectory()) {
-  //     //如果为目录，则渲读取目录内容
-  //     content = dir(ctx.url, reqPath);
-  //   } else {
-  //     // 如果请求为文件，则读取文件内容
-  //     content = await fs.readFile(reqPath);
-  //   }
-  // }
 }
 /**
  * 封装目录内容
@@ -85,14 +63,6 @@ async function getContent(ctx, fullStaticPath) {
 async function dir(url, reqPath) {
   // 遍历读取当前目录下的文件、子目录
   let contentList = await walk(reqPath);
-
-  console.log('url', url);
-
-  // let html = `<ul>`;
-  // for (let [index, item] of contentList.entries()) {
-  //   html = `${html}<li><a href="${url === '/' ? '' : url}/${item}">${item}</a>`;
-  // }
-  // html = `${html}</ul>`;
 
   const html = [
     '<ul>',
@@ -116,8 +86,6 @@ async function walk(reqPath) {
   let fileList = [];
   for (let i = 0, len = files.length; i < len; i++) {
     let file = files[i];
-    // let itemArr = item.split('.');
-    // let itemMime = itemArr.length > 1 ? itemArr[itemArr.length - 1] : 'undefined';
 
     const filePath = path.join(reqPath, file);
     const fileStats = await fs.stat(filePath);
@@ -177,10 +145,6 @@ function parsePostData(ctx) {
         postData += data;
       });
       ctx.req.addListener('end', function () {
-        // let parseData = parseQueryStr(postData);
-
-        // console.log('🔎 ~ file: app.js:82 ~ postData:', postData, typeof postData);
-
         let parseData = JSON.parse(postData);
         resolve(parseData);
       });

@@ -1,24 +1,39 @@
-<script setup>
-import Main from './components/Main.vue';
-</script>
-
 <template>
-  <div class="main">
-    <h2 class="title">BOSS直聘自动打招呼</h2>
-    <n-message-provider>
-      <Main />
-    </n-message-provider>
-  </div>
+  <n-config-provider :theme="theme">
+    <n-card style="height: 100vh">
+      <div class="main">
+        <h2 class="title">BOSS直聘自动打招呼</h2>
+        <n-message-provider>
+          <Main />
+        </n-message-provider>
+      </div>
+    </n-card>
+  </n-config-provider>
 </template>
 
+<script setup>
+import { ref, computed } from 'vue';
+import { useOsTheme, darkTheme } from 'naive-ui';
+import Main from './components/Main.vue';
+
+const osThemeRef = useOsTheme();
+const theme = computed(() => (osThemeRef.value === 'dark' ? darkTheme : null));
+</script>
+
 <style scoped>
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
 .main {
   display: flex;
   flex-direction: column;
-  /* justify-content: center; */
   align-items: center;
   box-sizing: border-box;
-  padding-top: 3rem;
+  padding: 3rem;
 }
 .title {
   font-weight: 500;

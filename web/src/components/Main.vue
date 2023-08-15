@@ -15,22 +15,19 @@
         label="查询链接"
         feedback="默认参数为：前端开发工程师 / 1-3年经验 / 薪资待遇10-20K / 学历要求本科；链接出处见 https://github.com/engvuchen/boss-zhipin-robot-web"
       >
-        <n-input v-model:value="modelRef.queryParams" type="textarea" />
+        <n-input v-model:value="modelRef.queryParams" @change="onQueryParamsChange" type="textarea" />
       </n-form-item>
-      <!-- todo -->
-      <n-form-item path="salaryRange" label="精确薪资范围" feedback="解决BOSS薪资范围过于粗放的问题">
-        <n-dynamic-input v-model:value="modelRef.salaryRange" :max="1" :min="1">
-          <template #default="{ value }">
-            <div style="display: flex; align-items: center; width: 100%">
-              <n-input-number v-model:value="value.min" style="margin-right: 12px; width: 160px" />
-              <n-input-number v-model:value="value.max" style="margin-right: 12px; width: 160px" />
-            </div>
-          </template>
-        </n-dynamic-input>
+      <n-form-item path="salaryStart" label="起薪（K）" :feedback="salaryStartFeedback">
+        <n-input-number
+          v-model:value="modelRef.salaryStart"
+          placeholder="岗位薪资最大值需大于该值"
+          style="width: 280px"
+        />
       </n-form-item>
       <n-form-item path="keySkills" label="精确技能筛选">
         <n-select
           v-model:value="modelRef.keySkills"
+          placeholder="打招呼：岗位详情需包含此处的每一个技能"
           filterable
           multiple
           tag
@@ -41,8 +38,8 @@
       <n-form-item path="targetNum" label="打招呼数量" class="">
         <n-input-number
           v-model:value="modelRef.targetNum"
-          feedback="数字越大，执行时间越长，请斟酌数量"
-          @keydown.enter.prevent
+          placeholder="数字越大，执行时间越长，请斟酌"
+          style="width: 280px"
         />
       </n-form-item>
       <n-form-item path="helloTxt" label="招呼语">
@@ -63,6 +60,11 @@
           :options="excludeJobs.map(curr => ({ label: curr, value: curr }))"
         />
       </n-form-item>
+
+      <n-form-item path="headless" label="观察打招呼过程">
+        <n-switch v-model:value="modelRef.headless" :checked-value="false" unchecked-value="new" />
+      </n-form-item>
+
       <div style="display: flex; justify-content: flex-end">
         <n-button round type="primary" :disabled="btnDisabled" @click="handleValidateButtonClick">启动任务</n-button>
       </div>
@@ -82,33 +84,59 @@
   </div>
 </template>
 <script setup>
-import { ref, reactive, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useMessage } from 'naive-ui';
 import { isFake, request } from '@/util';
 const message = useMessage();
-import { keySkills, defaultExcludeCompanies, excludeCompanies, excludeJobs } from './enums';
+import { keySkills, excludeCompanies, excludeJobs, defaultValues, salaryRangeMap } from './enums';
+
+const cacheMod = JSON.parse(localStorage.getItem('zhipin-robot') || '{}');
+const mod = Object.assign(defaultValues, cacheMod);
+let [salaryMin, salaryMax] = getSalary(mod.queryParams);
+mod.salaryStart = salaryMin;
 const rules = {
   queryParams: [
     {
       required: true,
-      message: '请输入',
+      // message: '请输入',
       validator(rule, value) {
         let reg = new RegExp('https://www.zhipin.com/web/geek/job');
         if (!value) {
           return new Error('请输入');
-          // https://www.zhipin.com/web/geek/job
         } else if (!reg.test(value)) {
           return new Error('应为网址');
+        } else if (isFake(getSalary(modelRef.value.queryParams)[0])) {
+          return new Error('查询链接中的 salary 非法');
         }
         return true;
       },
-      trigger: ['blur'],
+      trigger: ['blur', undefined], // trigger 包含 undefined，触发 formRef.value?.validate
     },
   ],
+  salaryStart: [
+    {
+      required: true,
+      type: 'number',
+      trigger: ['blur', undefined],
+      validator(rule, value) {
+        if (!value) {
+          return new Error('请输入');
+        } else if (!/^[1-9][0-9]*$/.test(value)) {
+          return new Error('应为正整数');
+        } else if (value >= salaryMax) {
+          return new Error('需小于岗位薪资最大值');
+        }
+
+        return true;
+      },
+    },
+  ],
+  keySkills: [{ required: true, type: 'array', message: '请输入', trigger: ['blur', undefined] }],
   targetNum: [
     {
       required: true,
       type: 'number',
+      trigger: ['blur'],
       validator(rule, value) {
         if (!value) {
           return new Error('请输入');
@@ -117,11 +145,10 @@ const rules = {
         }
         return true;
       },
-      trigger: ['blur'],
     },
   ],
-  helloTxt: [{ required: true, message: '请输入', trigger: ['blur'] }],
-  wt2Cookie: [{ required: true, message: '请输入', trigger: ['blur'] }],
+  helloTxt: [{ required: true, message: '请输入', trigger: ['blur', undefined] }],
+  wt2Cookie: [{ required: true, message: '请输入', trigger: ['blur', undefined] }],
 };
 let requiredNames = Object.keys(rules).reduce((accu, key) => {
   let list = rules[key];
@@ -131,48 +158,48 @@ let requiredNames = Object.keys(rules).reduce((accu, key) => {
   return accu;
 }, []);
 
-const cacheMoRef = localStorage.getItem('zhipin-robot') || '';
-
+// Data
 const formRef = ref(null);
-const modelRef = cacheMoRef
-  ? ref(JSON.parse(cacheMoRef))
-  : ref({
-      queryParams:
-        'https://www.zhipin.com/web/geek/job?query=%E5%89%8D%E7%AB%AF%E5%BC%80%E5%8F%91%E5%B7%A5%E7%A8%8B%E5%B8%88&city=101280600&experience=104&degree=203&salary=405&page=1',
-      targetNum: 2,
-      salaryRange: [
-        {
-          min: 10,
-          max: 20,
-        },
-      ],
-      keySkills: ['vue'],
-      helloTxt:
-        '面试官您好！看到贵司在前端工程师的岗位，而我过往经历中，有1年小程序开发经验，2年管理端开发经验，我的过往经历跟贵司的匹配度是非常高的。而我目前已经离职，最快到岗时间是一周以内，非常期待贵司能给我一个面试机会，展示一下自己。若您对我的微简历有什么疑问，我随时在线解答。',
-      cookie: '',
-      excludeCompanies: defaultExcludeCompanies,
-      excludeJobs: ['外包', '派遣'],
-    });
+const modelRef = ref(mod);
+const messageList = ref([]);
+// Computed
 let waitAutoSendHello = ref(false);
 const btnDisabled = computed(() => {
   return requiredNames.some(key => isFake(modelRef.value[key])) || waitAutoSendHello.value;
 });
-const messageList = ref([]);
+const salaryStartFeedback = computed(() => {
+  let { queryParams } = modelRef.value;
+  if (!queryParams) return '';
+  let [salaryMin, salaryMax] = getSalary(queryParams);
+
+  // let txt = `（${salaryMax} K）；当前筛选薪资 ${salaryMin}-${salaryMax} K`;
+
+  return `正整数；需小于岗位薪资最大值（${salaryMax} K）；当前筛选薪资 ${salaryMin}-${salaryMax} K`;
+});
 const messageListStr = computed(() => {
   return messageList.value.join('\n');
 });
 
-// 此处 new ，触发一次 wss connection
-let wss = new WebSocket('ws://127.0.0.1:3000');
-wss.onopen = function (event) {
-  console.log('WebSocket is open now.');
-};
-wss.onmessage = event => {
-  messageList.value.push(event.data);
-};
+// LifeCycle
+onMounted(() => {
+  initWs();
+});
+
+// Method
+function initWs() {
+  // 此处 new ，触发一次 wss connection
+  let wss = new WebSocket('ws://127.0.0.1:3000');
+  wss.onopen = function (event) {
+    console.log('WebSocket is open now.');
+  };
+  wss.onmessage = event => {
+    messageList.value.push(event.data);
+  };
+}
 async function handleValidateButtonClick(e) {
   e.preventDefault();
   let validErr = await formRef.value?.validate(async errors => {
+    console.log('🔎 ~ file: Main.vue:193 ~ validErr ~ errors:', errors);
     return new Promise(resolve => {
       if (errors) return resolve(errors);
       resolve(true);
@@ -184,7 +211,9 @@ async function handleValidateButtonClick(e) {
   }
 
   let sendData = JSON.parse(JSON.stringify(modelRef._value));
-  localStorage.setItem('zhipin-robot', JSON.stringify(sendData));
+  // console.log('🔎 ~ file: Main.vue:211 ~ handleValidateButtonClick ~ sendData:', sendData);
+
+  localStorage.setItem('zhipin-robot', JSON.stringify(sendData)); // todo { formData }
 
   waitAutoSendHello.value = true;
   let res = await request({
@@ -197,6 +226,21 @@ async function handleValidateButtonClick(e) {
   if (res?.code !== 0) {
     return message.error(res?.msg || '');
   }
+}
+function onQueryParamsChange(e) {
+  let { queryParams = '' } = modelRef._value;
+  if (!queryParams) return;
+  let [min, max] = getSalary(queryParams);
+  if (isFake(min)) return message.error('查询链接中的 salary 非法');
+
+  salaryMax = max;
+  modelRef.value.salaryStart = min;
+}
+
+function getSalary(queryParams = '') {
+  let params = new URLSearchParams(queryParams);
+  let salary = params.get('salary');
+  return salaryRangeMap[salary] || [undefined, Infinity];
 }
 </script>
 <style scoped>

@@ -1,5 +1,3 @@
-import './assets/main.css';
-
 import { createApp } from 'vue';
 import App from './App.vue';
 import {
@@ -11,13 +9,28 @@ import {
   NInputNumber,
   NSelect,
   NButton,
+  NSwitch,
+  NCard,
   NMessageProvider,
   NForm,
   NFormItem,
+  NConfigProvider,
 } from 'naive-ui';
 
 const naive = create({
-  components: [NButton, NInput, NDynamicInput, NInputNumber, NSelect, NMessageProvider, NForm, NFormItem],
+  components: [
+    NInput,
+    NDynamicInput,
+    NInputNumber,
+    NSelect,
+    NButton,
+    NSwitch,
+    NCard,
+    NMessageProvider,
+    NForm,
+    NFormItem,
+    NConfigProvider,
+  ],
 });
 
 const app = createApp(App);

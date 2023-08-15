@@ -18,10 +18,7 @@ app.use(logger());
 // 处理跨域
 app.use(async (ctx, next) => {
   ctx.set('Access-Control-Allow-Origin', '*');
-  ctx.set(
-    'Access-Control-Allow-Headers',
-    'Content-Type, Content-Length, Authorization, Accept, X-Requested-With , yourHeaderFeild'
-  );
+  ctx.set('Access-Control-Allow-Headers', 'Content-Type, Content-Length, Authorization, Accept');
   ctx.set('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
   if (ctx.method == 'OPTIONS') {
     ctx.body = 0;
@@ -40,16 +37,19 @@ router.get('/', async ctx => {
 });
 router.post('/api/send', async (ctx, next) => {
   let postData = await parsePostData(ctx);
+  // Object.assign(postData, {
+  //   salaryRange: [postData.salaryRange[0].min, postData.salaryRange[0].max],
+  // });
   postData.queryParams = handleQueryStr(postData.queryParams); // string => obj
+
   await autoSayHello(postData);
-  ctx.body = { code: 0, msg: 'ok' };
+
+  return (ctx.body = { code: 0, msg: 'ok' });
 });
 app.use(router.routes());
 
 // 处理静态资源
 app.use(async (ctx, next) => {
-  console.log('ctx.path', ctx.path);
-
   if (ctx.path.startsWith('/api')) return await next();
 
   if (!['HEAD', 'GET'].includes(ctx.method)) {
@@ -78,7 +78,6 @@ app.use(async (ctx, next) => {
 let wss = new WebSocket.Server({ clientTracking: false, noServer: true });
 const server = http.createServer(app.callback());
 // const server = http.createServer(app);
-// 服务器触发了 upgrade 事件，才触发 socket；upgrade 是由客户端请求触发的吗？
 server.on('upgrade', function (request, socket, head) {
   wss.handleUpgrade(request, socket, head, function (ws) {
     wss.emit('connection', ws, request);
@@ -97,7 +96,7 @@ wss.on('connection', function (ws, request) {
     }
   };
 });
-logs.push = function mutator(txt) {
+logs.push = function monitor(txt) {
   if (typeof subscribeLogs !== 'function') {
     return console.error('客户端未连接，请刷新页面');
   }
