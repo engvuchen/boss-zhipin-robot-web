@@ -48,7 +48,7 @@
       <n-form-item path="wt2Cookie" label="Cookie（wt2）" feedback="登陆后手动获取 Cookie 中的 wt2 部分">
         <n-input v-model:value="modelRef.wt2Cookie" type="textarea" />
       </n-form-item>
-      <n-form-item path="excludeCompanies" label="屏蔽公司关键词">
+      <n-form-item path="excludeCompanies" label="屏蔽公司关键词" feedback="字母需小写">
         <n-select v-model:value="modelRef.excludeCompanies" filterable multiple tag :options="excludeCompanies" />
       </n-form-item>
       <n-form-item path="excludeJobs" label="屏蔽工作关键词">

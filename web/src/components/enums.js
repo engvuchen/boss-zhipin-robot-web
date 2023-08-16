@@ -9,7 +9,7 @@ const defaultExcludeCompanies = [
   '网易',
   '腾讯',
   '百度',
-  'Shopee',
+  'shopee',
   '快手',
   '深圳腾娱互动科技',
   '人才',
