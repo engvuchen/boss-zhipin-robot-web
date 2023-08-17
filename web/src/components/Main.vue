@@ -27,19 +27,11 @@
       <n-form-item path="keySkills" label="精确技能筛选">
         <n-select
           v-model:value="modelRef.keySkills"
-          placeholder="打招呼：岗位详情需包含此处的每一个技能"
+          placeholder=" 岗位详情需包含此处的每一个技能"
           filterable
           multiple
           tag
           :options="keySkills.map(curr => ({ label: curr, value: curr }))"
-        />
-      </n-form-item>
-      <!-- todo -->
-      <n-form-item path="targetNum" label="打招呼数量" class="">
-        <n-input-number
-          v-model:value="modelRef.targetNum"
-          placeholder="数字越大，执行时间越长，请斟酌"
-          style="width: 280px"
         />
       </n-form-item>
       <n-form-item path="helloTxt" label="招呼语">
@@ -47,6 +39,16 @@
       </n-form-item>
       <n-form-item path="wt2Cookie" label="Cookie（wt2）" feedback="登陆后手动获取 Cookie 中的 wt2 部分">
         <n-input v-model:value="modelRef.wt2Cookie" type="textarea" />
+      </n-form-item>
+      <n-form-item path="targetNum" label="打招呼数量">
+        <n-input-number
+          v-model:value="modelRef.targetNum"
+          placeholder="数字越大，执行时间越长，请斟酌"
+          style="width: 280px"
+        />
+      </n-form-item>
+      <n-form-item path="timeout" label="超时（秒）" feedback="选择器等待时间，默认3s。出现超时问题，可以增大后重试">
+        <n-slider v-model:value="modelRef.timeout" :step="1" :min="3" :max="10" style="width: 280px" />
       </n-form-item>
       <n-form-item path="excludeCompanies" label="屏蔽公司关键词" feedback="字母需小写">
         <n-select v-model:value="modelRef.excludeCompanies" filterable multiple tag :options="excludeCompanies" />
@@ -99,6 +101,7 @@ const rules = {
     {
       required: true,
       // message: '请输入',
+      trigger: ['blur', undefined], // trigger 包含 undefined，触发 formRef.value?.validate
       validator(rule, value) {
         let reg = new RegExp('https://www.zhipin.com/web/geek/job');
         if (!value) {
@@ -110,7 +113,6 @@ const rules = {
         }
         return true;
       },
-      trigger: ['blur', undefined], // trigger 包含 undefined，触发 formRef.value?.validate
     },
   ],
   salaryStart: [
@@ -136,7 +138,7 @@ const rules = {
     {
       required: true,
       type: 'number',
-      trigger: ['blur'],
+      trigger: ['blur', undefined],
       validator(rule, value) {
         if (!value) {
           return new Error('请输入');
@@ -145,6 +147,13 @@ const rules = {
         }
         return true;
       },
+    },
+  ],
+  timeout: [
+    {
+      required: true,
+      type: 'number',
+      trigger: ['blur', undefined],
     },
   ],
   helloTxt: [{ required: true, message: '请输入', trigger: ['blur', undefined] }],
@@ -171,9 +180,6 @@ const salaryStartFeedback = computed(() => {
   let { queryParams } = modelRef.value;
   if (!queryParams) return '';
   let [salaryMin, salaryMax] = getSalary(queryParams);
-
-  // let txt = `（${salaryMax} K）；当前筛选薪资 ${salaryMin}-${salaryMax} K`;
-
   return `正整数；需小于岗位薪资最大值（${salaryMax} K）；当前筛选薪资 ${salaryMin}-${salaryMax} K`;
 });
 const messageListStr = computed(() => {
@@ -199,7 +205,6 @@ function initWs() {
 async function handleValidateButtonClick(e) {
   e.preventDefault();
   let validErr = await formRef.value?.validate(async errors => {
-    console.log('🔎 ~ file: Main.vue:193 ~ validErr ~ errors:', errors);
     return new Promise(resolve => {
       if (errors) return resolve(errors);
       resolve(true);
@@ -211,8 +216,6 @@ async function handleValidateButtonClick(e) {
   }
 
   let sendData = JSON.parse(JSON.stringify(modelRef._value));
-  // console.log('🔎 ~ file: Main.vue:211 ~ handleValidateButtonClick ~ sendData:', sendData);
-
   localStorage.setItem('zhipin-robot', JSON.stringify(sendData)); // todo { formData }
 
   waitAutoSendHello.value = true;

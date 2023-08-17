@@ -41,6 +41,7 @@ router.post('/api/send', async (ctx, next) => {
   //   salaryRange: [postData.salaryRange[0].min, postData.salaryRange[0].max],
   // });
   postData.queryParams = handleQueryStr(postData.queryParams); // string => obj
+  postData.timeout = postData.timeout * 1000;
 
   await autoSayHello(postData);
 

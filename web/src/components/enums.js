@@ -50,10 +50,11 @@ const defaultValues = {
   //   },
   // ],
   keySkills: [],
-  targetNum: 2,
   helloTxt:
     '面试官您好！看到贵司在前端工程师的岗位，而我过往经历中，有1年小程序开发经验，2年管理端开发经验，我的过往经历跟贵司的匹配度是非常高的。而我目前已经离职，最快到岗时间是一周以内，非常期待贵司能给我一个面试机会，展示一下自己。若您对我的微简历有什么疑问，我随时在线解答。',
   wt2Cookie: '',
+  targetNum: 2,
+  timeout: 3,
   excludeCompanies: defaultExcludeCompanies,
   excludeJobs: ['外包', '派遣'],
   headless: false,

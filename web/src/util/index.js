@@ -37,8 +37,6 @@ function request({
       // dataKeys.forEach(key => {
       //   sendData.append(key, data[key]);
       // });
-      console.log('🔎 ~ file: index.js:41 ~ returnnewPromise ~ data:', data);
-
       sendData = JSON.stringify(data);
     }
 
