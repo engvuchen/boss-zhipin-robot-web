@@ -7,18 +7,17 @@
 ## 使用
 
 1. 安装依赖与启动项目 `npm run init-start`；
+   1. 若不需要调试，安装依赖后，仅需 `npm run start` 启动服务；
 
-  1.1 若不需要调试，安装依赖后，仅需 `npm run start` 启动服务；
 
 2. 获取查询参数：在 [BOSS 岗位市场页面](https://www.zhipin.com/web/geek/job)进行筛选后，筛选参数会同步到地址栏，复制这个地址栏链接。
 
 ![查询参数](https://engvu.oss-cn-shenzhen.aliyuncs.com/e05a3a8b9f32aa0bec24b49431540e03.webp)
 
 3. 获取个人 Cookie：
+1. 先在 BOSS 直聘[登陆页](https://www.zhipin.com/web/user/?ka=header-login)登入个人账号；
+   2. 使用 Chrome 控制台工具， 切换到 Application（应用），点击“存储- Cookie”，获取个人 cookie（wbg）；
 
-   3.1 先在 BOSS 直聘[登陆页](https://www.zhipin.com/web/user/?ka=header-login)登入个人账号；
-
-   3.2 使用 Chrome 控制台工具， 切换到 Application（应用），点击“存储- Cookie”，获取个人 cookie（wbg）；
 
 ![获取个人Cookie](https://engvu.oss-cn-shenzhen.aliyuncs.com/7a185a08a64782df63119eb61b0ab966.webp)
 
@@ -41,6 +40,10 @@
 | `start`      | ⬜️            | 🟩         | ⬜️            | ⬜️        |
 
 > 注意：`dev`、`start` 使用的端口不同（3000、5173），`localStorage` 保存的位置不同。从 `start` 切换 `dev`，需重新填写一次表单。
+
+## 已知问题
+
+1. `puppeteer` 安装失败。尝试使用 `cnpm` 安装或设置`npm`到本地的代理端口（ `npm config set proxy http://proxy_host:port`）。
 
 ## 免责声名
 
