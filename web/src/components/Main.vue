@@ -80,13 +80,19 @@
       }"
     >
       <n-form-item label="服务日志">
-        <n-input v-model:value="messageListStr" type="textarea" class="code" @keydown.enter.prevent />
+        <n-input
+          ref="serverLogsNode"
+          v-model:value="messageListStr"
+          type="textarea"
+          class="code"
+          @keydown.enter.prevent
+        />
       </n-form-item>
     </n-form>
   </div>
 </template>
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import { useMessage } from 'naive-ui';
 import { isFake, request } from '@/util';
 const message = useMessage();
@@ -167,6 +173,8 @@ let requiredNames = Object.keys(rules).reduce((accu, key) => {
   return accu;
 }, []);
 
+// Dom
+const serverLogsNode = ref(null);
 // Data
 const formRef = ref(null);
 const modelRef = ref(mod);
@@ -190,7 +198,6 @@ const messageListStr = computed(() => {
 onMounted(() => {
   initWs();
 });
-
 // Method
 function initWs() {
   // 此处 new ，触发一次 wss connection
@@ -198,8 +205,13 @@ function initWs() {
   wss.onopen = function (event) {
     console.log('WebSocket is open now.');
   };
-  wss.onmessage = event => {
+  wss.onmessage = async event => {
     messageList.value.push(event.data);
+    await nextTick();
+    // textareaElRef 是组件内的 ref；通过父组件 ref 访问它，又不需要通过 .value 获取 DOM
+    if (serverLogsNode.value?.textareaElRef.scrollHeight) {
+      serverLogsNode.value.textareaElRef.scrollTop = serverLogsNode.value?.textareaElRef.scrollHeight;
+    }
   };
 }
 async function handleValidateButtonClick(e) {
