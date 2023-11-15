@@ -1,6 +1,6 @@
 const process = require('process');
 const { exec } = require('child_process');
-const { color, debounce, sleep } = require('./util');
+const { color, debounce, sleep, checkNodeVersion } = require('./util');
 
 main();
 
@@ -11,6 +11,10 @@ async function main() {
    * "init-start": "npm i && (cross-env NODE_ENV=production node app.js)"
    * "start": "cross-env NODE_ENV=production node app.js"
    */
+
+  if (!checkNodeVersion()) {
+    return console.log(color['bgRedTxtWhite']('ERROR') + ' Requires Node.js version 14.18+, 16+');
+  }
 
   // npm run dev [--init]
   let tools = {};
@@ -28,7 +32,7 @@ async function main() {
     },
   ];
 
-  // return console.log(process.argv);
+  // return console.log(process.versions.node);
 
   for (let i = 0; i < taskList.length; i++) {
     let { id, cmd, options = {}, colorType } = taskList[i];
@@ -39,7 +43,7 @@ async function main() {
     // let { logs } = tools[id];
     let colorPrefix = color[colorType](id);
     tools[id].showLogs = debounce((logs, id) => {
-      console.log(`${colorPrefix}\n${logs.join('').replace(/\n+/g, '\n')}`);
+      console.log(`${colorPrefix}\n${logs.join('')}`.replace(/\n+/g, '\n'));
     });
     let event = exec(cmd, options, function (err, stdout, stderr) {
       if (err) {

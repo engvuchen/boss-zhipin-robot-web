@@ -2,13 +2,12 @@
 
 > 希望能在现在的大环境下帮助你找到一份满意的工作。
 
-最近一次 node.js 依赖：`v18.16.0`；
+node.js 依赖：14.18+, 16+。
 
 ## 使用
 
-1. 安装依赖与启动项目 `npm run init-start`；
-   1. 若不需要调试，安装依赖后，仅需 `npm run start` 启动服务；
-
+1. 启动项目 `npm run init-dev`；
+   - 安装依赖成功后，仅需 `npm run dev` 启动服务；
 
 2. 获取查询参数：在 [BOSS 岗位市场页面](https://www.zhipin.com/web/geek/job)进行筛选后，筛选参数会同步到地址栏，复制这个地址栏链接。
 
@@ -18,7 +17,6 @@
 1. 先在 BOSS 直聘[登陆页](https://www.zhipin.com/web/user/?ka=header-login)登入个人账号；
    2. 使用 Chrome 控制台工具， 切换到 Application（应用），点击“存储- Cookie”，获取个人 cookie（wbg）；
 
-
 ![获取个人Cookie](https://engvu.oss-cn-shenzhen.aliyuncs.com/7a185a08a64782df63119eb61b0ab966.webp)
 
 ## 调试
@@ -26,11 +24,10 @@
 项目包含服务端工程、网页端工程（web 目录），调试时需分别安装依赖、分别启动项目；
 
 1. 先进入 web 目录，安装依赖 `npm i`，然后执行 `npm run dev`；
-2. 根目录执行 `node app.js`；
+2. 根目录执行 `npm i`，然后执行 `node app.js`；
+3. 以上流程简化成 `npm run init-dev`
 
-使用以下指令可提高调试效率（mac 自测可用，window 会卡在监听流程）：
-
-启用格式：`npm run script-name`（bash 终端）
+以下是指令列表，启用格式都是：`npm run script-name`（bash 终端）
 
 | 指令         | 服务端下载依赖 | 服务端启动 | 网页端下载依赖 | 网页端启动 |
 | ------------ | -------------- | ---------- | -------------- | ---------- |
@@ -44,6 +41,13 @@
 ## 已知问题
 
 1. `puppeteer` 安装失败。尝试使用 `cnpm` 安装或设置`npm`到本地的代理端口（ `npm config set proxy http://proxy_host:port`）。
+2. 先禁用默认招呼语，否则只会发送默认招呼语给 HR。
+
+下面的例子是在网页端右上角禁用招呼语：
+
+![image-20231116030223834](https://engvu.oss-cn-shenzhen.aliyuncs.com/347d0cf1d9614701c0f2f18dd92796b7.webp)
+
+![image-20231116030240089](https://engvu.oss-cn-shenzhen.aliyuncs.com/b0ec5a6078483d90285a5bd334390f8e.webp)
 
 ## 免责声名
 

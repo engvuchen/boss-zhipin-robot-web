@@ -172,26 +172,35 @@ function sleep(time = 1000) {
   });
 }
 
-// ANSI 颜色映射
+// ANSI 颜色映射。一般底色正确，文字颜色受具体终端影响
 const ansiColors = {
-  bgBlue: '\x1b[44m', // 蓝色 #617e4e
-  bgGreen: '\x1b[42m', // 绿色 #4d4d10
+  bgBlue: '\x1b[44m', // 蓝色
+  bgGreen: '\x1b[42m', // 绿色
+  bgRed: '\x1b[41m', // 红色
   // bgYellow: '\x1b[43m', // 黄色
   txtWhite: '\x1b[37m', // 文本颜色为白色。定死。
   bgBlueTxtWhite: '\x1b[44m\x1b[37m',
   bgGreenTxtWhite: '\x1b[42m\x1b[37m',
+  bgRedTxtWhite: '\x1b[41m\x1b[37m',
   reset: '\x1b[0m', // 重置样式
 };
 let color = Object.keys(ansiColors).reduce((obj, key) => {
+  if (key === 'reset') return obj;
   obj[key] = str => `${ansiColors[key]}${str}${ansiColors.reset}`;
   return obj;
 }, {});
+
 function debounce(fn, delay = 1000) {
   let timer;
   return function (...args) {
     if (timer) clearTimeout(timer);
     timer = setTimeout(fn.bind(null, ...args), delay);
   };
+}
+/** vite 需要 14.18+，16+ 运行 */
+function checkNodeVersion() {
+  let version = process.versions.node;
+  return version.startsWith('14.18.') || version.startsWith('16.');
 }
 
 module.exports = {
@@ -205,4 +214,5 @@ module.exports = {
   sleep,
   color,
   debounce,
+  checkNodeVersion,
 };
