@@ -7,8 +7,8 @@
     "lib": "lib"
   },
   "scripts": {
-    "init-dev": "node dev.js --init",
     "dev": "node dev.js",
+    "init-dev": "node dev.js --init",
     "init-start": "npm i && (cross-env NODE_ENV=production node app.js)",
     "start": "cross-env NODE_ENV=production node app.js"
   },
