@@ -228,6 +228,7 @@ async function handleValidateButtonClick(e) {
   }
 
   let sendData = JSON.parse(JSON.stringify(modelRef._value));
+  console.log("🔎 ~ file: Main.vue:231 ~ handleValidateButtonClick ~ sendData:", sendData)
   localStorage.setItem('zhipin-robot', JSON.stringify(sendData)); // todo { formData }
 
   waitAutoSendHello.value = true;
