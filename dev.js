@@ -55,7 +55,11 @@ async function main() {
       tools[id].logs.push(data);
       tools[id].showLogs(tools[id].logs, id);
     });
+    event.stderr.on('data', data => {
+      tools[id].logs.push(data);
+      tools[id].showLogs(tools[id].logs, id);
+    });
 
-    await sleep(2000);
+    if (i === 0) await sleep(2000);
   }
 }
