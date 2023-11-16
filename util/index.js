@@ -200,7 +200,8 @@ function debounce(fn, delay = 1000) {
 /** vite 需要 14.18+，16+ 运行 */
 function checkNodeVersion() {
   let version = process.versions.node;
-  return version.startsWith('14.18.') || version.startsWith('16.');
+  let [patch, minor] = version.split('.').map(str => +str);
+  return (patch === 14 && minor >= 18) || patch >= 16;
 }
 
 module.exports = {

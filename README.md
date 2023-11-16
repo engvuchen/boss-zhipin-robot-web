@@ -7,6 +7,7 @@ node.js 依赖：14.18+, 16+。
 ## 使用
 
 1. 启动项目 `npm run init-dev`；
+   - 初次安装依赖，因 server、client 安装依赖的所需时间不一致，server 可能较早启动，5173 打开白屏；后续等 client 启动完成，手动刷新 5173 网页即可。
    - 安装依赖成功后，仅需 `npm run dev` 启动服务；
 
 2. 获取查询参数：在 [BOSS 岗位市场页面](https://www.zhipin.com/web/geek/job)进行筛选后，筛选参数会同步到地址栏，复制这个地址栏链接。
@@ -40,8 +41,10 @@ node.js 依赖：14.18+, 16+。
 
 ## 已知问题
 
-1. `puppeteer` 安装失败。尝试使用 `cnpm` 安装或设置`npm`到本地的代理端口（ `npm config set proxy http://proxy_host:port`）。
-2. 先禁用默认招呼语，否则只会发送默认招呼语给 HR。
+1. `puppeteer` 安装失败。尝试使用 `cnpm` 安装或设置`npm`到本地的代理端口（ `npm config set proxy http://proxy_host:port`）；
+2. BOSS 设置
+ - 简历可见；
+ - 禁用默认招呼语，否则只会发送默认招呼语给 HR。
 
 下面的例子是在网页端右上角禁用招呼语：
 
