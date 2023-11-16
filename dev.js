@@ -13,7 +13,7 @@ async function main() {
    */
 
   if (!checkNodeVersion()) {
-    return console.log(color['bgRedTxtWhite']('ERROR') + ' Requires Node.js version 14.18+, 16+');
+    return console.log(color['bgRedTxtWhite']('ERROR') + ' Requires Node.js version 16.3+');
   }
 
   // npm run dev [--init]
@@ -32,34 +32,30 @@ async function main() {
     },
   ];
 
-  // return console.log(process.versions.node);
-
   for (let i = 0; i < taskList.length; i++) {
     let { id, cmd, options = {}, colorType } = taskList[i];
     if (process.argv[2] === '--init') {
       cmd = `npm i && ${cmd}`;
     }
     tools[id] = { logs: [] };
-    // let { logs } = tools[id];
     let colorPrefix = color[colorType](id);
-    tools[id].showLogs = debounce((logs, id) => {
-      console.log(`${colorPrefix}\n${logs.join('')}`.replace(/\n+/g, '\n'));
-    });
+    tools[id].showLogs = debounce(conf => {
+      console.log(`${colorPrefix}\n${conf.logs.join('')}`.replace(/\n+/g, '\n'));
+      conf.logs = []; // 打印后清空记录
+    }, 2000);
     let event = exec(cmd, options, function (err, stdout, stderr) {
       if (err) {
-        console.log(colorPrefix + '\n' + err);
+        console.log(color['bgRedTxtWhite']('ERROR') + '\n' + err);
         process.exit();
       }
     });
     event.stdout.on('data', data => {
       tools[id].logs.push(data);
-      tools[id].showLogs(tools[id].logs, id);
+      tools[id].showLogs(tools[id]);
     });
     event.stderr.on('data', data => {
       tools[id].logs.push(data);
-      tools[id].showLogs(tools[id].logs, id);
+      tools[id].showLogs(tools[id]);
     });
-
-    if (i === 0) await sleep(2000);
   }
 }

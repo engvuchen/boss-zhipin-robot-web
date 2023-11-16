@@ -2,7 +2,14 @@
 
 > 希望能在现在的大环境下帮助你找到一份满意的工作。
 
-node.js 依赖：14.18+, 16+。
+Node.js 依赖：16.3+
+
+1. `vite`：14.18+, 16+
+2. `rollup@3.27.0`
+	1. warn - `required: { node: '>=14.18.0', npm: '>=8.0.0' }`
+3. `@puppeteer/browsers@1.4.6`
+	1. warn - `required: { node: '>=16.3.0' }`
+   2. `??=`：16+。[参考](https://node.green/#ES2021-features-Logical-Assignment-----basic-support)
 
 ## 使用
 
