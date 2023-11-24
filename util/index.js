@@ -197,11 +197,11 @@ function debounce(fn, delay = 1000) {
     timer = setTimeout(fn.bind(null, ...args), delay);
   };
 }
-/** vite 需要 14.18+，16+ 运行 */
+/** node.js 16.3+ 运行 */
 function checkNodeVersion() {
   let version = process.versions.node;
   let [patch, minor] = version.split('.').map(str => +str);
-  return (patch === 14 && minor >= 18) || patch >= 16;
+  return patch > 16 || (patch === 16 && minor >= 3);
 }
 
 module.exports = {
