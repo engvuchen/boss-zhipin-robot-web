@@ -7,7 +7,7 @@ const logger = require('koa-logger');
 const router = require('@koa/router')();
 const { WebSocket } = require('ws');
 const { main: autoSayHello, logs } = require('boss-zhipin-robot-core');
-const { parseMime, getContent, openUrl, handleQueryStr, parsePostData } = require('./util');
+const { parseMime, getContent, openUrlOnce, handleQueryStr, parsePostData } = require('./util');
 
 const isDev = process.env.NODE_ENV !== 'production';
 const staticPath = 'dist';
@@ -85,7 +85,7 @@ server.on('upgrade', function (request, socket, head) {
   });
 });
 server.listen(3000);
-openUrl(`http://localhost:${isDev ? 5173 : 3000}`);
+openUrlOnce(`http://localhost:${isDev ? 5173 : 3000}`);
 
 // wss.once('connection', function (ws) { });
 let subscribeLogs;

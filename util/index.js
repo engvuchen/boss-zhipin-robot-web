@@ -102,21 +102,26 @@ async function walk(reqPath) {
   return result;
 }
 
-function openUrl(url) {
-  switch (process.platform) {
-    case 'darwin':
-      exec(`open ${url}`);
-      break;
-    case 'win32':
-      exec(`start ${url}`);
-      break;
-    default:
-      exec(`xdg-open ${url}`);
-      break;
+let opened = false;
+function openUrlOnce(url) {
+  if (!opened) {
+    opened = true;
+
+    switch (process.platform) {
+      case 'darwin':
+        exec(`open ${url}`);
+        break;
+      case 'win32':
+        exec(`start ${url}`);
+        break;
+      default:
+        exec(`xdg-open ${url}`);
+        break;
+    }
   }
 }
 function handleQueryStr(url) {
-  let [, queryStr] = url.split('?');
+  let [, queryStr = ''] = url.split('?');
   // a=11&b=222
   let queryObj = {};
   queryStr.split('&').map(currStr => {
@@ -209,7 +214,7 @@ module.exports = {
   getContent,
   dir,
   walk,
-  openUrl,
+  openUrlOnce,
   handleQueryStr,
   parsePostData,
   sleep,
