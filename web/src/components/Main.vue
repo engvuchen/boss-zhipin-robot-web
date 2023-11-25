@@ -13,21 +13,34 @@
       <n-form-item
         path="queryParams"
         label="查询链接"
-        feedback="默认参数为：前端开发工程师 / 1-3年经验 / 薪资待遇10-20K / 学历要求本科；链接出处见 https://github.com/engvuchen/boss-zhipin-robot-web"
+        feedback="以 `https://www.zhipin.com/web/geek/job` 开头。出处见 https://github.com/engvuchen/boss-zhipin-robot-web"
       >
-        <n-input v-model:value="modelRef.queryParams" @change="onQueryParamsChange" type="textarea" />
+        <n-input
+          v-model:value="modelRef.queryParams"
+          @change="onQueryParamsChange"
+          type="textarea"
+          placeholder="以 `https://www.zhipin.com/web/geek/job` 开头"
+        />
       </n-form-item>
-      <n-form-item path="salaryStart" label="起薪（K）" :feedback="salaryStartFeedback">
-        <n-input-number
-          v-model:value="modelRef.salaryStart"
-          placeholder="岗位薪资最大值需大于该值"
+
+      <n-form-item v-if="showSalaryRange && salaryMin === 50" path="salaryRange" label="精确薪资范围（K）" feedback="">
+        <n-input-number v-model:value="modelRef.salaryRange[0]" style="width: 280px" :min="50" :step="1" />
+      </n-form-item>
+      <n-form-item v-else-if="showSalaryRange" path="salaryRange" label="精确薪资范围（K）">
+        <n-slider
+          v-model:value="modelRef.salaryRange"
+          :min="salaryMin"
+          :max="salaryMax"
+          range
+          :step="1"
           style="width: 280px"
         />
       </n-form-item>
+
       <n-form-item path="keySkills" label="精确技能筛选">
         <n-select
           v-model:value="modelRef.keySkills"
-          placeholder=" 岗位详情需包含此处的每一个技能"
+          placeholder="岗位详情需包含此处的每一个技能"
           filterable
           multiple
           tag
@@ -37,20 +50,26 @@
       <n-form-item path="helloTxt" label="招呼语">
         <n-input v-model:value="modelRef.helloTxt" type="textarea" style="height: 8rem" />
       </n-form-item>
-      <n-form-item path="wt2Cookie" label="Cookie（wt2）" feedback="登陆后手动获取 Cookie 中的 wt2 部分">
-        <n-input v-model:value="modelRef.wt2Cookie" type="textarea" />
+      <n-form-item path="wt2Cookie" label="Cookie（wt2）">
+        <n-input v-model:value="modelRef.wt2Cookie" placeholder="登陆后手动获取 Cookie 中的 wt2 部分" type="textarea" />
       </n-form-item>
-      <n-form-item path="targetNum" label="打招呼数量">
-        <n-input-number
+      <n-form-item path="targetNum" label="打招呼数量" feedback="数字越大，执行时间越长，请斟酌">
+        <n-slider
           v-model:value="modelRef.targetNum"
+          :min="1"
+          :max="99"
           placeholder="数字越大，执行时间越长，请斟酌"
           style="width: 280px"
         />
       </n-form-item>
-      <n-form-item path="timeout" label="超时（秒）" feedback="选择器等待时间，默认3s。出现超时问题，可以增大后重试">
+      <n-form-item
+        path="timeout"
+        label="超时（秒）"
+        feedback="选择器、资源等待时间。出现资源、选择器问题，建议增大后重试"
+      >
         <n-slider v-model:value="modelRef.timeout" :step="1" :min="3" :max="10" style="width: 280px" />
       </n-form-item>
-      <n-form-item path="excludeCompanies" label="屏蔽公司关键词" feedback="字母需小写">
+      <n-form-item path="excludeCompanies" label="屏蔽公司关键词">
         <n-select v-model:value="modelRef.excludeCompanies" filterable multiple tag :options="excludeCompanies" />
       </n-form-item>
       <n-form-item path="excludeJobs" label="屏蔽工作关键词">
@@ -96,59 +115,71 @@ import { ref, computed, onMounted, nextTick } from 'vue';
 import { useMessage } from 'naive-ui';
 import { isFake, request } from '@/util';
 const message = useMessage();
-import { keySkills, excludeCompanies, excludeJobs, defaultValues, salaryRangeMap } from './enums';
+import { defaultOptions, defaultValues, SALARY_RANGE_MAP } from './enums';
+let [keySkills, excludeJobs, excludeCompanies] = defaultOptions; // tpl
 
-const cacheMod = JSON.parse(localStorage.getItem('zhipin-robot') || '{}');
-const mod = Object.assign(defaultValues, cacheMod);
-let [salaryMin, salaryMax] = getSalary(mod.queryParams);
-mod.salaryStart = salaryMin;
 const rules = {
   queryParams: [
     {
       required: true,
-      // message: '请输入',
       trigger: ['blur', undefined], // trigger 包含 undefined，触发 formRef.value?.validate
       validator(rule, value) {
         let reg = new RegExp('https://www.zhipin.com/web/geek/job');
-        if (!value) {
-          return new Error('请输入');
-        } else if (!reg.test(value)) {
+        // if (!value) {
+        //   return new Error('请输入');
+        // } else
+        if (!reg.test(value)) {
           return new Error('应为网址');
-        } else if (isFake(getSalary(modelRef.value.queryParams)[0])) {
-          return new Error('查询链接中的 salary 非法');
         }
+        // else if (isFake(getSalary(modelRef.value.queryParams)[0])) {
+        //   return new Error('查询链接中的 salary 非法');
+        // }
         return true;
       },
     },
   ],
-  salaryStart: [
+  // salaryStart: [
+  //   {
+  //     required: false,
+  //     type: 'number',
+  //     trigger: ['blur', undefined],
+  //     validator(rule, value) {
+  //       if (!value) {
+  //         return new Error('请输入');
+  //       } else if (!/^[1-9][0-9]*$/.test(value)) {
+  //         return new Error('应为正整数');
+  //       } else if (value >= salaryMax) {
+  //         return new Error('需小于岗位薪资最大值');
+  //       }
+
+  //       return true;
+  //     },
+  //   },
+  // ],
+  salaryRange: [
     {
-      required: true,
+      required: false,
       type: 'number',
       trigger: ['blur', undefined],
       validator(rule, value) {
-        if (!value) {
-          return new Error('请输入');
-        } else if (!/^[1-9][0-9]*$/.test(value)) {
+        if (!/^[1-9][0-9]*$/.test(value)) {
           return new Error('应为正整数');
-        } else if (value >= salaryMax) {
-          return new Error('需小于岗位薪资最大值');
         }
-
         return true;
       },
     },
   ],
-  keySkills: [{ required: true, type: 'array', message: '请输入', trigger: ['blur', undefined] }],
+  keySkills: [{ required: true, type: 'array', trigger: ['blur', undefined] }],
   targetNum: [
     {
       required: true,
       type: 'number',
       trigger: ['blur', undefined],
       validator(rule, value) {
-        if (!value) {
-          return new Error('请输入');
-        } else if (!/^[1-9][0-9]*$/.test(value)) {
+        // if (!value) {
+        //   return new Error('请输入');
+        // } else
+        if (!/^[1-9][0-9]*$/.test(value)) {
           return new Error('应为正整数');
         }
         return true;
@@ -162,8 +193,8 @@ const rules = {
       trigger: ['blur', undefined],
     },
   ],
-  helloTxt: [{ required: true, message: '请输入', trigger: ['blur', undefined] }],
-  wt2Cookie: [{ required: true, message: '请输入', trigger: ['blur', undefined] }],
+  helloTxt: [{ required: true, trigger: ['blur', undefined] }],
+  wt2Cookie: [{ required: true, trigger: ['blur', undefined] }],
 };
 let requiredNames = Object.keys(rules).reduce((accu, key) => {
   let list = rules[key];
@@ -176,20 +207,33 @@ let requiredNames = Object.keys(rules).reduce((accu, key) => {
 // Dom
 const serverLogsNode = ref(null);
 // Data
+// const [salaryMin, salaryMax] = [ref(salaryRange[0]), ref(salaryRange[1])];
+const salaryMin = ref(undefined);
+const salaryMax = ref(undefined);
+const showSalaryRange = ref(false); // todo
+
 const formRef = ref(null);
-const modelRef = ref(mod);
+const modelRef = ref(getMod());
 const messageList = ref([]);
+
+console.log('modelRef._value.salaryRange[0]', modelRef._value.salaryRange[0]);
+
 // Computed
 let waitAutoSendHello = ref(false);
 const btnDisabled = computed(() => {
   return requiredNames.some(key => isFake(modelRef.value[key])) || waitAutoSendHello.value;
 });
-const salaryStartFeedback = computed(() => {
-  let { queryParams } = modelRef.value;
-  if (!queryParams) return '';
-  let [salaryMin, salaryMax] = getSalary(queryParams);
-  return `正整数；需小于岗位薪资最大值（${salaryMax} K）；当前筛选薪资 ${salaryMin}-${salaryMax} K`;
-});
+// const salaryStartFeedback = computed(() => {
+//   let { queryParams } = modelRef.value;
+//   if (!queryParams) return '';
+//   let [salaryMin, salaryMax] = getSalary(queryParams);
+//   // return `正整数；需小于岗位薪资最大值（${salaryMax} K）；当前筛选薪资 ${salaryMin}-${salaryMax} K`;
+
+//   if (!isFake(salaryMin)) {
+//     return `正整数；当前筛选薪资 ${salaryMin}-${salaryMax} K`;
+//   }
+//   return `未选择薪资或薪资枚举值非法`;
+// });
 const messageListStr = computed(() => {
   return messageList.value.join('\n');
 });
@@ -197,6 +241,7 @@ const messageListStr = computed(() => {
 // LifeCycle
 onMounted(() => {
   initWs();
+  onQueryParamsChange();
 });
 // Method
 function initWs() {
@@ -228,8 +273,8 @@ async function handleValidateButtonClick(e) {
   }
 
   let sendData = JSON.parse(JSON.stringify(modelRef._value));
-  console.log("🔎 ~ file: Main.vue:231 ~ handleValidateButtonClick ~ sendData:", sendData)
-  localStorage.setItem('zhipin-robot', JSON.stringify(sendData)); // todo { formData }
+  return console.log('🔎 ~ file: Main.vue:231 ~ handleValidateButtonClick ~ sendData:', sendData);
+  localStorage.setItem('zhipin-robot', JSON.stringify(sendData));
 
   waitAutoSendHello.value = true;
   let res = await request({
@@ -243,20 +288,36 @@ async function handleValidateButtonClick(e) {
     return message.error(res?.msg || '');
   }
 }
+// todo
 function onQueryParamsChange(e) {
   let { queryParams = '' } = modelRef._value;
   if (!queryParams) return;
-  let [min, max] = getSalary(queryParams);
-  if (isFake(min)) return message.error('查询链接中的 salary 非法');
 
-  salaryMax = max;
-  modelRef.value.salaryStart = min;
+  let [min, max] = getSalary(queryParams);
+  if (isFake(min)) {
+    showSalaryRange.value = false;
+    modelRef.value.salaryRange = [undefined];
+    return;
+  }
+
+  showSalaryRange.value = true;
+  [salaryMin.value, salaryMax.value] = [min, max];
+  if (min === 50) {
+    modelRef.value.salaryRange = [min];
+  } else {
+    modelRef.value.salaryRange = [min, max];
+  }
 }
 
+function getMod() {
+  let mod = Object.assign(defaultValues, JSON.parse(localStorage.getItem('zhipin-robot') || '{}'));
+  if (!isFake(salaryMin.value)) mod.salaryRange = [salaryMin, salaryMax];
+  return mod;
+}
 function getSalary(queryParams = '') {
   let params = new URLSearchParams(queryParams);
   let salary = params.get('salary');
-  return salaryRangeMap[salary] || [undefined, Infinity];
+  return SALARY_RANGE_MAP[salary] || [undefined];
 }
 </script>
 <style scoped>

@@ -6,9 +6,9 @@ Node.js 依赖：16.3+
 
 1. `vite`：14.18+, 16+
 2. `rollup@3.27.0`
-	1. warn - `required: { node: '>=14.18.0', npm: '>=8.0.0' }`
+   1. warn - `required: { node: '>=14.18.0', npm: '>=8.0.0' }`
 3. `@puppeteer/browsers@1.4.6`
-	1. warn - `required: { node: '>=16.3.0' }`
+   1. warn - `required: { node: '>=16.3.0' }`
    2. `??=`：16+。[参考](https://node.green/#ES2021-features-Logical-Assignment-----basic-support)
 
 ## 使用
@@ -22,8 +22,7 @@ Node.js 依赖：16.3+
 ![查询参数](https://engvu.oss-cn-shenzhen.aliyuncs.com/e05a3a8b9f32aa0bec24b49431540e03.webp)
 
 3. 获取个人 Cookie：
-1. 先在 BOSS 直聘[登陆页](https://www.zhipin.com/web/user/?ka=header-login)登入个人账号；
-   2. 使用 Chrome 控制台工具， 切换到 Application（应用），点击“存储- Cookie”，获取个人 cookie（wbg）；
+1. 先在 BOSS 直聘[登陆页](https://www.zhipin.com/web/user/?ka=header-login)登入个人账号； 2. 使用 Chrome 控制台工具， 切换到 Application（应用），点击“存储- Cookie”，获取个人 cookie（wbg）；
 
 ![获取个人Cookie](https://engvu.oss-cn-shenzhen.aliyuncs.com/7a185a08a64782df63119eb61b0ab966.webp)
 
@@ -50,8 +49,9 @@ Node.js 依赖：16.3+
 
 1. `puppeteer` 安装失败。尝试使用 `cnpm` 安装或设置`npm`到本地的代理端口（ `npm config set proxy http://proxy_host:port`）；
 2. BOSS 设置
- - 简历可见；
- - 禁用默认招呼语，否则只会发送默认招呼语给 HR。
+
+- 简历可见；
+- 禁用默认招呼语，否则只会发送默认招呼语给 HR。
 
 下面的例子是在网页端右上角禁用招呼语：
 

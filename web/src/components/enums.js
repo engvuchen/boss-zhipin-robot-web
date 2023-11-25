@@ -1,5 +1,22 @@
 // 默认：不投递大厂、屏蔽部分外包公司关键词
-const keySkills = ['vue', 'react', 'react native', 'webpack', 'vite', 'fluter', 'uniapp', '小程序', 'h5', 'ts'];
+const keySkills = [
+  'vue',
+  'react',
+  'react native',
+  'webpack',
+  'vite',
+  'fluter',
+  'uniapp',
+  '小程序',
+  'h5',
+  'ts',
+  'java',
+  'mysql',
+  'redis',
+  'docker',
+  'spring',
+  'mybatis',
+];
 
 const defaultExcludeCompanies = [
   '阿里巴巴',
@@ -19,18 +36,18 @@ const defaultExcludeCompanies = [
 const excludeCompanies = defaultExcludeCompanies.map(name => ({ label: name, value: name }));
 // 工作名屏蔽
 const excludeJobs = [
-  'Flutter',
+  // 'Flutter',
   'flutter',
   'shopify',
-  'React',
+  // 'React',
   'react',
   'RN',
-  'React Native',
+  'react native',
   'PHP',
   'WordPress',
   'Front End',
   'App',
-  'Angular',
+  // 'Angular',
   'angular',
   '混合',
   'uniapp',
@@ -38,18 +55,15 @@ const excludeJobs = [
   '派遣',
   '外包',
 ];
+const defaultOptions = [keySkills, excludeJobs, excludeCompanies];
 
 const defaultValues = {
-  queryParams:
-    'https://www.zhipin.com/web/geek/job?query=%E5%89%8D%E7%AB%AF%E5%BC%80%E5%8F%91%E5%B7%A5%E7%A8%8B%E5%B8%88&city=101280600&experience=104&degree=203&salary=405&page=1',
+  // queryParams:
+  //   'https://www.zhipin.com/web/geek/job?query=%E5%89%8D%E7%AB%AF%E5%BC%80%E5%8F%91%E5%B7%A5%E7%A8%8B%E5%B8%88&city=101280600&experience=104&degree=203&salary=405&page=1',
+  queryParams: 'https://www.zhipin.com/web/geek/job',
   // salaryMin: 10,
-  // salaryRange: [
-  //   {
-  //     min: 10,
-  //     max: 20,
-  //   },
-  // ],
-  keySkills: [],
+  salaryRange: [undefined],
+  keySkills: ['vue'],
   helloTxt:
     '面试官您好！看到贵司在前端工程师的岗位，而我过往经历中，有1年小程序开发经验，2年管理端开发经验，我的过往经历跟贵司的匹配度是非常高的。而我目前已经离职，最快到岗时间是一周以内，非常期待贵司能给我一个面试机会，展示一下自己。若您对我的微简历有什么疑问，我随时在线解答。',
   wt2Cookie: '',
@@ -60,7 +74,7 @@ const defaultValues = {
   headless: false,
 };
 
-const salaryRangeMap = {
+const SALARY_RANGE_MAP = {
   402: [0, 3],
   403: [3, 5],
   404: [5, 10],
@@ -69,4 +83,4 @@ const salaryRangeMap = {
   407: [50, Infinity],
 };
 
-export { keySkills, defaultExcludeCompanies, excludeCompanies, excludeJobs, defaultValues, salaryRangeMap };
+export { defaultOptions, defaultValues, SALARY_RANGE_MAP };
