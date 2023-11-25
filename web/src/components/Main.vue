@@ -187,7 +187,7 @@ const messageListStr = computed(() => {
 // LifeCycle
 onMounted(() => {
   initWs();
-  onQueryParamsChange();
+  onQueryParamsChange(null, true);
 });
 // Method
 function initWs() {
@@ -234,7 +234,7 @@ async function onSubmit(e) {
     return message.error(res?.msg || '');
   }
 }
-function onQueryParamsChange(e) {
+function onQueryParamsChange(e, init = false) {
   let { queryParams = '' } = modelRef._value;
   if (!queryParams) return;
 
@@ -247,12 +247,14 @@ function onQueryParamsChange(e) {
 
   showSalaryRange.value = true;
   [salaryMin.value, salaryMax.value] = [min, max];
-  modelRef.value.salaryRange = [min, max];
+
+  if (!init) {
+    modelRef.value.salaryRange = [min, max];
+  }
 }
 
 function getMod() {
   let mod = Object.assign(defaultValues, JSON.parse(localStorage.getItem('zhipin-robot') || '{}'));
-  if (!isFake(salaryMin.value)) mod.salaryRange = [salaryMin, salaryMax];
   return mod;
 }
 function getSalary(queryParams = '') {
