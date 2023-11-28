@@ -205,8 +205,8 @@ function debounce(fn, delay = 1000) {
 /** node.js 16.3+ 运行 */
 function checkNodeVersion() {
   let version = process.versions.node;
-  let [patch, minor] = version.split('.').map(str => +str);
-  return patch > 16 || (patch === 16 && minor >= 3);
+  let [major, minor] = version.split('.').map(str => +str);
+  return major > 16 || (major === 16 && minor >= 3);
 }
 
 module.exports = {
