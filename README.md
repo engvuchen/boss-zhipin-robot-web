@@ -22,7 +22,7 @@ Node.js 依赖：16.3+
 ![查询参数](https://engvu.oss-cn-shenzhen.aliyuncs.com/e05a3a8b9f32aa0bec24b49431540e03.webp)
 
 3. 获取个人 Cookie：
-1. 先在 BOSS 直聘[登陆页](https://www.zhipin.com/web/user/?ka=header-login)登入个人账号； 2. 使用 Chrome 控制台工具， 切换到 Application（应用），点击“存储- Cookie”，获取个人 cookie（wbg）；
+1. 先在 BOSS 直聘[登陆页](https://www.zhipin.com/web/user/?ka=header-login)登入个人账号； 2. 使用 Chrome 控制台工具， 切换到 Application（应用），点击“存储- Cookie”，获取个人 cookie（wt2）；
 
 ![获取个人Cookie](https://engvu.oss-cn-shenzhen.aliyuncs.com/7a185a08a64782df63119eb61b0ab966.webp)
 
