@@ -203,7 +203,10 @@ onMounted(() => {
 // Method
 function initWs() {
     // 此处 new ，触发一次 wss connection
-    let wss = new WebSocket('ws://127.0.0.1:3000');
+    const ip = import.meta.env.BOSS_IP || 'localhost';
+    const port = import.meta.env.BOSS_PORT || '3000';
+
+    let wss = new WebSocket(`ws://${ip}:${port}`);
     wss.onopen = function (event) {
         console.log('WebSocket is open now.');
     };
