@@ -26,7 +26,7 @@ app.use(async (ctx, next) => {
     await next();
 });
 
-// 处理路由
+// 返回静态资源
 router.get('/', async ctx => {
     ctx.set('content-type', 'text/html');
     if (isDev) {
@@ -80,13 +80,10 @@ server.on('upgrade', function (request, socket, head) {
         wss.emit('connection', ws, request);
     });
 });
-server.listen(3000);
-openUrlOnce(`http://localhost:${isDev ? 5173 : 3000}`);
 
-// wss.once('connection', function (ws) { });
 let subscribeLogs;
 wss.on('connection', function (ws, request) {
-    console.log('成功连接');
+    console.log('wss 成功连接');
     subscribeLogs = txt => {
         if (ws.readyState === WebSocket.OPEN) {
             ws.send(txt);
@@ -97,7 +94,13 @@ logs.push = function monitor(txt) {
     if (typeof subscribeLogs !== 'function') {
         return console.error('客户端未连接，请刷新页面');
     }
-
     subscribeLogs(txt); // 利用闭包实现手动发消息
     // [].push.apply(this, [txt]);
 };
+
+let { BOSS_IP: ip = 'localhost', BOSS_PORT: port = 3000 } = process.env;
+
+server.listen(port);
+if (ip === 'localhost') {
+    openUrlOnce(`http://${ip}:${isDev ? 5173 : port}`);
+}
