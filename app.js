@@ -83,7 +83,7 @@ server.on('upgrade', function (request, socket, head) {
 
 let subscribeLogs;
 wss.on('connection', function (ws, request) {
-    console.log('wss 成功连接');
+    console.log('wss 成功连接'); // 不及时关闭页面，会有 2 个 websocket 连接，日志显示会失败
     subscribeLogs = txt => {
         if (ws.readyState === WebSocket.OPEN) {
             ws.send(txt);
