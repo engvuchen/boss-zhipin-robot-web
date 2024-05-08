@@ -1,104 +1,48 @@
 <template>
     <div>
-        <n-form
-            ref="formRef"
-            :model="modelRef"
-            :rules="rules"
-            label-placement="left"
-            label-width="120"
-            :style="{
+        <n-form ref="formRef" :model="modelRef" :rules="rules" label-placement="left" label-width="120" :style="{
                 minWidth: '400px',
-            }"
-            class="form"
-        >
-            <n-form-item
-                path="queryParams"
-                label="查询链接"
-                feedback="以 `https://www.zhipin.com/web/geek/job` 开头。出处见 https://github.com/engvuchen/boss-zhipin-robot-web"
-            >
-                <n-input
-                    v-model:value="modelRef.queryParams"
-                    @change="onQueryParamsChange"
-                    type="textarea"
-                    placeholder="以 `https://www.zhipin.com/web/geek/job` 开头"
-                />
+}" class="form">
+            <n-form-item path="queryParams" label="查询链接"
+                feedback="以 `https://www.zhipin.com/web/geek/job` 开头。出处见 https://github.com/engvuchen/boss-zhipin-robot-web">
+                <n-input v-model:value="modelRef.queryParams" @change="onQueryParamsChange" type="textarea"
+                    placeholder="以 `https://www.zhipin.com/web/geek/job` 开头" />
             </n-form-item>
             <n-form-item path="helloTxt" label="招呼语">
                 <n-input v-model:value="modelRef.helloTxt" type="textarea" style="height: 8rem" />
             </n-form-item>
             <n-form-item path="wt2Cookie" label="Cookie（wt2）">
-                <n-input
-                    v-model:value="modelRef.wt2Cookie"
-                    placeholder="登陆后手动获取 Cookie 中的 wt2 部分"
-                    type="textarea"
-                />
+                <n-input v-model:value="modelRef.wt2Cookie" placeholder="登陆后手动获取 Cookie 中的 wt2 部分" type="textarea" />
             </n-form-item>
-            <n-form-item
-                path="targetNum"
-                label="打招呼数量"
-                feedback="数量越多，执行时间越长。BOSS 限制每日最多 100 次打招呼"
-            >
-                <n-slider
-                    v-model:value="modelRef.targetNum"
-                    :min="1"
-                    :max="99"
-                    placeholder="数字越大，执行时间越长，请斟酌"
-                    style="width: 280px"
-                />
+            <n-form-item path="targetNum" label="打招呼数量" feedback="数量越多，执行时间越长。BOSS 限制每日最多 100 次打招呼">
+                <n-slider v-model:value="modelRef.targetNum" :min="1" :max="99" placeholder="数字越大，执行时间越长，请斟酌"
+                    style="width: 280px" />
             </n-form-item>
-            <n-form-item
-                path="timeout"
-                label="超时（秒）"
-                feedback="选择器、资源等待时间。出现资源、选择器问题，建议增大后重试"
-            >
+            <n-form-item path="timeout" label="超时（秒）" feedback="选择器、资源等待时间。出现资源、选择器问题，建议增大后重试">
                 <n-slider v-model:value="modelRef.timeout" :step="1" :min="5" :max="30" style="width: 280px" />
             </n-form-item>
 
             <!-- 精确筛选条件 -->
             <!-- v-if="showSalaryRange" -->
-            <n-form-item
-                path="salaryRange"
-                label="薪酬区间（K）"
-                :feedback="`可在 [${salaryMin}, 100] 自定义薪酬，若岗位薪酬区间与此区间有交集，则匹配。当前薪酬枚举 [${salaryMin}, ${salaryMax}]`"
-            >
-                <n-slider
-                    v-model:value="modelRef.salaryRange"
-                    :min="salaryMin"
-                    :max="100"
-                    range
-                    :step="1"
-                    style="width: 280px"
-                />
+            <n-form-item path="salaryRange" label="薪酬区间（K）"
+                :feedback="`可在 [${salaryMin}, 100] 自定义薪酬，若岗位薪酬区间与此区间有交集，则匹配。当前薪酬枚举 [${salaryMin}, ${salaryMax}]`">
+                <n-slider v-model:value="modelRef.salaryRange" :min="salaryMin" v-if="showSalaryRange" :max="100" range
+                    :step="1" style="width: 280px" />
             </n-form-item>
             <n-form-item path="keySkills" label="精确技能筛选" feedback="岗位详情需匹配此处的每一个技能">
-                <n-select
-                    v-model:value="modelRef.keySkills"
-                    filterable
-                    multiple
-                    tag
-                    :options="keySkills.map(curr => ({ label: curr, value: curr }))"
-                />
+                <n-select v-model:value="modelRef.keySkills" filterable multiple tag
+                    :options="keySkills.map(curr => ({ label: curr, value: curr }))" />
             </n-form-item>
             <!-- <n-form-item path="jobUpdateTime" label="仅投递在X天内有更新的岗位" feedback="不传，默认为 365">
                 <n-input-number :min="1" :max="365" v-model:value="modelRef.jobUpdateTime" />
             </n-form-item> -->
             <n-form-item path="excludeCompanies" label="屏蔽公司关键词">
-                <n-select
-                    v-model:value="modelRef.excludeCompanies"
-                    filterable
-                    multiple
-                    tag
-                    :options="excludeCompanies"
-                />
+                <n-select v-model:value="modelRef.excludeCompanies" filterable multiple tag
+                    :options="excludeCompanies" />
             </n-form-item>
             <n-form-item path="excludeJobs" label="屏蔽工作关键词">
-                <n-select
-                    v-model:value="modelRef.excludeJobs"
-                    filterable
-                    multiple
-                    tag
-                    :options="excludeJobs.map(curr => ({ label: curr, value: curr }))"
-                />
+                <n-select v-model:value="modelRef.excludeJobs" filterable multiple tag
+                    :options="excludeJobs.map(curr => ({ label: curr, value: curr }))" />
             </n-form-item>
 
             <n-form-item path="headless" label="观察打招呼过程">
@@ -110,100 +54,91 @@
             </div>
         </n-form>
 
-        <n-form
-            v-if="messageList.length"
-            label-width="120"
-            :style="{
-                minWidth: '400px',
-            }"
-        >
+        <n-form v-if="messageList.length" label-width="120" :style="{
+            minWidth: '400px',
+        }">
             <n-form-item label="服务日志">
-                <n-input
-                    ref="serverLogsNode"
-                    v-model:value="messageListStr"
-                    type="textarea"
-                    class="code"
-                    @keydown.enter.prevent
-                />
+                <n-input ref="serverLogsNode" v-model:value="messageListStr" type="textarea" class="code"
+                    @keydown.enter.prevent />
             </n-form-item>
         </n-form>
     </div>
 </template>
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue';
-import { useMessage } from 'naive-ui';
-import { isFake, request } from '@/util';
-const message = useMessage();
-import { defaultOptions, defaultValues, SALARY_RANGE_MAP } from './enums';
-let [keySkills, excludeJobs, excludeCompanies] = defaultOptions;
+    import { ref, computed, onMounted, nextTick } from 'vue';
+    import { useMessage } from 'naive-ui';
+    import { isFake, request } from '@/util';
+    const message = useMessage();
+    import { defaultOptions, defaultValues, SALARY_RANGE_MAP } from './enums';
+    let [keySkills, excludeJobs, excludeCompanies] = defaultOptions;
 
-const rules = {
-    queryParams: [
-        {
-            required: true,
-            trigger: ['blur', undefined], // trigger 包含 undefined，触发 formRef.value?.validate
-            validator(rule, value) {
-                let reg = new RegExp('https://www.zhipin.com/web/geek/job');
-                if (!reg.test(value)) {
-                    return new Error('应为网址');
-                }
-                return true;
+    const rules = {
+        queryParams: [
+            {
+                required: true,
+                trigger: ['blur', undefined], // trigger 包含 undefined，触发 formRef.value?.validate
+                validator(rule, value) {
+                    let reg = new RegExp('https://www.zhipin.com/web/geek/job');
+                    if (!reg.test(value)) {
+                        return new Error('应为网址');
+                    }
+                    return true;
+                },
             },
-        },
-    ],
-    targetNum: [
-        {
-            required: true,
-            type: 'number',
-            trigger: ['blur', undefined],
-            validator(rule, value) {
-                if (!/^[1-9][0-9]*$/.test(value)) {
-                    return new Error('应为正整数');
-                }
-                return true;
+        ],
+        targetNum: [
+            {
+                required: true,
+                type: 'number',
+                trigger: ['blur', undefined],
+                validator(rule, value) {
+                    if (!/^[1-9][0-9]*$/.test(value)) {
+                        return new Error('应为正整数');
+                    }
+                    return true;
+                },
             },
-        },
-    ],
-    timeout: [
-        {
-            required: true,
-            type: 'number',
-            trigger: ['blur', undefined],
-        },
-    ],
-    helloTxt: [{ required: true, trigger: ['blur', undefined] }],
-    wt2Cookie: [{ required: true, trigger: ['blur', undefined] }],
-    keySkills: [{ type: 'array', trigger: ['blur', undefined] }],
-    // jobUpdateTime: [
-    //     {
-    //         // required: true,
-    //         type: 'number',
-    //         trigger: ['blur', undefined],
-    //         validator(rule, value) {
-    //             if ([null, '', undefined].includes(value)) return true;
-    //             if (!/^[1-9][0-9]*$/.test(value)) {
-    //                 return new Error('应为正整数');
-    //             }
-    //             return true;
-    //         },
-    //     },
-    // ],
-};
-let requiredNames = Object.keys(rules).reduce((accu, key) => {
-    let list = rules[key];
-    if (list.some(item => item.required)) {
-        accu.push(key);
-    }
-    return accu;
-}, []);
+        ],
+        timeout: [
+            {
+                required: true,
+                type: 'number',
+                trigger: ['blur', undefined],
+            },
+        ],
+        helloTxt: [{ required: true, trigger: ['blur', undefined] }],
+        wt2Cookie: [{ required: true, trigger: ['blur', undefined] }],
+        keySkills: [{ type: 'array', trigger: ['blur', undefined] }],
+        // jobUpdateTime: [
+        //     {
+        //         // required: true,
+        //         type: 'number',
+        //         trigger: ['blur', undefined],
+        //         validator(rule, value) {
+        //             if ([null, '', undefined].includes(value)) return true;
+        //             if (!/^[1-9][0-9]*$/.test(value)) {
+        //                 return new Error('应为正整数');
+        //             }
+        //             return true;
+        //         },
+        //     },
+        // ],
+    };
+    let requiredNames = Object.keys(rules).reduce((accu, key) => {
+        let list = rules[key];
+        if (list.some(item => item.required)) {
+            accu.push(key);
+        }
+        return accu;
+    }, []);
 
-// Dom
-const serverLogsNode = ref(null);
-// Data
-const salaryMin = ref(undefined);
-const salaryMax = ref(Infinity); // 10-20K，可以把 15-30K 筛选出来，薪酬终点限制感觉没必要
-// const enumSalaryMax = ref(Infinity);
-// const showSalaryRange = ref(false);
+    // Dom
+    const serverLogsNode = ref(null);
+    // Data
+    const salaryMin = ref(undefined);
+    const salaryMax = ref(Infinity); // 10-20K，可以把 15-30K 筛选出来，薪酬终点限制感觉没必要
+    // const enumSalaryMax = ref(Infinity);
+    const showSalaryRange = ref(false);
 
 const formRef = ref(null);
 const modelRef = ref(getMod());
@@ -287,7 +222,10 @@ function onQueryParamsChange(e, init = false) {
     // [salaryMin.value, salaryMax.value] = [min, max];
     salaryMin.value = min;
     salaryMax.value = max;
-
+    modelRef.value.salaryRange = [min, max] //初始化range防止slider报错
+    if (modelRef.value.salaryRange && Array.isArray(modelRef.value.salaryRange)) {
+        showSalaryRange.value = true;//salaryRange必须存在且类型必须为数组
+    }
     if (!init) {
         modelRef.value.salaryRange = [min, 100];
     }
