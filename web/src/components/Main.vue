@@ -83,22 +83,29 @@
                 <n-input-number :min="1" :max="365" v-model:value="modelRef.jobUpdateTime" />
             </n-form-item> -->
             <n-form-item path="excludeCompanies" label="屏蔽公司关键词">
-                <n-select
-                    v-model:value="modelRef.excludeCompanies"
-                    filterable
-                    multiple
-                    tag
-                    :options="excludeCompanies"
-                />
+                <div class="flex flex-column">
+                    <n-select
+                        v-model:value="modelRef.excludeCompanies"
+                        filterable
+                        multiple
+                        tag
+                        :options="excludeCompanies"
+                        class="mb-2"
+                    />
+                    <div class="help">若公司名包含此处的任意一个关键词，则被过滤；忽略大小写</div>
+                </div>
             </n-form-item>
-            <n-form-item path="excludeJobs" label="屏蔽工作关键词">
-                <n-select
-                    v-model:value="modelRef.excludeJobs"
-                    filterable
-                    multiple
-                    tag
-                    :options="excludeJobs.map(curr => ({ label: curr, value: curr }))"
-                />
+            <n-form-item path="excludeJobs" label="屏蔽岗位关键词">
+                <div class="flex flex-column">
+                    <n-select
+                        v-model:value="modelRef.excludeJobs"
+                        filterable
+                        multiple
+                        tag
+                        :options="excludeJobs.map(curr => ({ label: curr, value: curr }))"
+                    />
+                    <div class="help">若岗位名包含此处的任意一个关键词，则被过滤；忽略大小写</div>
+                </div>
             </n-form-item>
 
             <n-form-item path="headless" label="观察打招呼过程">
@@ -321,5 +328,21 @@ function getSalary(queryParams = '') {
 }
 .form >>> .n-form-item-feedback__line {
     margin-bottom: 20px;
+}
+
+.flex {
+    display: flex;
+}
+.flex-column {
+    flex-direction: column;
+}
+.justify-center {
+    justify-content: center;
+}
+.mb-2 {
+    margin-bottom: 4px;
+}
+.help {
+    color: var(--n-feedback-text-color);
 }
 </style>

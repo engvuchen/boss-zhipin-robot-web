@@ -36,19 +36,17 @@ const defaultExcludeCompanies = [
 const excludeCompanies = defaultExcludeCompanies.map(name => ({ label: name, value: name }));
 // 工作名屏蔽
 const excludeJobs = [
-    // 'Flutter',
     'flutter',
     'shopify',
-    // 'React',
     'react',
     'RN',
     'react native',
-    'PHP',
+    'php',
     'WordPress',
     'Front End',
     'App',
-    // 'Angular',
     'angular',
+    'java',
     '混合',
     'uniapp',
     '游戏',
