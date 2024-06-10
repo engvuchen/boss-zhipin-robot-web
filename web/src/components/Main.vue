@@ -36,7 +36,7 @@
             <n-form-item
                 path="targetNum"
                 label="打招呼数量"
-                feedback="数量越多，执行时间越长。BOSS 限制每日最多 100 次打招呼"
+                feedback="数量越多，执行时间越长。BOSS 每日限制 100 次打招呼"
             >
                 <n-slider
                     v-model:value="modelRef.targetNum"
@@ -104,7 +104,9 @@
                         tag
                         :options="excludeJobs.map(curr => ({ label: curr, value: curr }))"
                     />
-                    <div class="help">若岗位名包含此处的任意一个关键词，则被过滤；忽略大小写</div>
+                    <div class="help">
+                        若岗位名、岗位详情包含此处的任意一个关键词，则被过滤；比“精确技能筛选”优先，忽略大小写
+                    </div>
                 </div>
             </n-form-item>
 
