@@ -53,7 +53,7 @@ const excludeJobs = [
     '派遣',
     '外包',
 ];
-const defaultOptions = [keySkills, excludeJobs, excludeCompanies];
+const bossActiveOptions = ['1个月内活跃', '3个月内活跃', '半年内活跃', '无限制'];
 
 const defaultValues = {
     queryParams: 'https://www.zhipin.com/web/geek/job',
@@ -65,7 +65,7 @@ const defaultValues = {
     salaryMin: 0,
     salaryMax: 999,
     keySkills: [],
-    // jobUpdateTime: 120,
+    bossActiveType: '3个月内活跃',
     excludeCompanies: defaultExcludeCompanies,
     excludeJobs: ['外包', '派遣'],
     headless: false,
@@ -80,4 +80,4 @@ const SALARY_RANGE_MAP = {
     407: [50, 100], // slider 不支持 [50, Infinity]，写死 100
 };
 
-export { defaultOptions, defaultValues, SALARY_RANGE_MAP };
+export { keySkills, excludeCompanies, excludeJobs, bossActiveOptions, defaultValues, SALARY_RANGE_MAP };

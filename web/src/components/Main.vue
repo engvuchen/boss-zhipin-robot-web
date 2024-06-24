@@ -53,9 +53,7 @@
             >
                 <n-slider v-model:value="modelRef.timeout" :step="1" :min="5" :max="30" style="width: 280px" />
             </n-form-item>
-
             <!-- 精确筛选条件 -->
-            <!-- v-if="showSalaryRange" -->
             <n-form-item
                 path="salaryRange"
                 label="薪酬区间（K）"
@@ -70,6 +68,20 @@
                     style="width: 280px"
                 />
             </n-form-item>
+            <n-form-item path="bossActiveType" label="HR 活跃时间筛选">
+                <div class="flex flex-column">
+                    <n-select
+                        v-model:value="modelRef.bossActiveType"
+                        :options="
+                            bossActiveOptions.map(curr => ({
+                                label: curr,
+                                value: curr,
+                            }))
+                        "
+                    />
+                    <div class="help">仅投递 HR 在指定时间内有活跃的岗位</div>
+                </div>
+            </n-form-item>
             <n-form-item path="keySkills" label="精确技能筛选" feedback="岗位详情需匹配此处的每一个技能">
                 <n-select
                     v-model:value="modelRef.keySkills"
@@ -79,9 +91,6 @@
                     :options="keySkills.map(curr => ({ label: curr, value: curr }))"
                 />
             </n-form-item>
-            <!-- <n-form-item path="jobUpdateTime" label="仅投递在X天内有更新的岗位" feedback="不传，默认为 365">
-                <n-input-number :min="1" :max="365" v-model:value="modelRef.jobUpdateTime" />
-            </n-form-item> -->
             <n-form-item path="excludeCompanies" label="屏蔽公司关键词">
                 <div class="flex flex-column">
                     <n-select
@@ -143,8 +152,7 @@ import { ref, computed, onMounted, nextTick } from 'vue';
 import { useMessage } from 'naive-ui';
 import { isFake, request } from '@/util';
 const message = useMessage();
-import { defaultOptions, defaultValues, SALARY_RANGE_MAP } from './enums';
-let [keySkills, excludeJobs, excludeCompanies] = defaultOptions;
+import { keySkills, excludeJobs, excludeCompanies, bossActiveOptions, defaultValues, SALARY_RANGE_MAP } from './enums';
 
 const rules = {
     queryParams: [
@@ -183,20 +191,6 @@ const rules = {
     helloTxt: [{ required: true, trigger: ['blur', undefined] }],
     wt2Cookie: [{ required: true, trigger: ['blur', undefined] }],
     keySkills: [{ type: 'array', trigger: ['blur', undefined] }],
-    // jobUpdateTime: [
-    //     {
-    //         // required: true,
-    //         type: 'number',
-    //         trigger: ['blur', undefined],
-    //         validator(rule, value) {
-    //             if ([null, '', undefined].includes(value)) return true;
-    //             if (!/^[1-9][0-9]*$/.test(value)) {
-    //                 return new Error('应为正整数');
-    //             }
-    //             return true;
-    //         },
-    //     },
-    // ],
 };
 let requiredNames = Object.keys(rules).reduce((accu, key) => {
     let list = rules[key];
@@ -211,8 +205,6 @@ const serverLogsNode = ref(null);
 // Data
 const salaryMin = ref(undefined);
 const salaryMax = ref(Infinity); // 10-20K，可以把 15-30K 筛选出来，薪酬终点限制感觉没必要
-// const enumSalaryMax = ref(Infinity);
-// const showSalaryRange = ref(false);
 
 const formRef = ref(null);
 const modelRef = ref(getMod());
@@ -286,14 +278,6 @@ function onQueryParamsChange(e, init = false) {
     if (!queryParams) return;
 
     let [min = 0, max = Infinity] = getSalary(queryParams);
-    // if (isFake(min)) {
-    //     // showSalaryRange.value = false;
-    //     modelRef.value.salaryRange = [0, 100];
-    //     // return;
-    // }
-
-    // showSalaryRange.value = true;
-    // [salaryMin.value, salaryMax.value] = [min, max];
     salaryMin.value = min;
     salaryMax.value = max;
 
