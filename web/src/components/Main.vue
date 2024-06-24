@@ -68,7 +68,7 @@
                     style="width: 280px"
                 />
             </n-form-item>
-            <n-form-item path="bossActiveType" label="HR 活跃时间筛选">
+            <n-form-item path="bossActiveType" label="BOSS 活跃时间筛选">
                 <div class="flex flex-column">
                     <n-select
                         v-model:value="modelRef.bossActiveType"
@@ -79,7 +79,7 @@
                             }))
                         "
                     />
-                    <div class="help">仅投递 HR 在指定时间内有活跃的岗位</div>
+                    <div class="help">仅投递 BOSS 在指定时间内有活跃的岗位，活跃时间不存在也不投递</div>
                 </div>
             </n-form-item>
             <n-form-item path="keySkills" label="精确技能筛选" feedback="岗位详情需匹配此处的每一个技能">
@@ -99,7 +99,7 @@
                         multiple
                         tag
                         :options="excludeCompanies"
-                        class="mb-2"
+                        class="mb-4"
                     />
                     <div class="help">若公司名包含此处的任意一个关键词，则被过滤；忽略大小写</div>
                 </div>
@@ -123,7 +123,7 @@
                 <n-switch v-model:value="modelRef.headless" :checked-value="false" unchecked-value="new" />
             </n-form-item>
 
-            <div style="display: flex; justify-content: flex-end">
+            <div class="flex justify-end" style="width: 100%">
                 <n-button round type="primary" :disabled="btnDisabled" @click="onSubmit">启动任务</n-button>
             </div>
         </n-form>
@@ -325,8 +325,20 @@ function getSalary(queryParams = '') {
 .justify-center {
     justify-content: center;
 }
-.mb-2 {
+.justify-end {
+    justify-content: flex-end;
+}
+.align-top {
+    align-items: flex-start;
+}
+.mb-4 {
     margin-bottom: 4px;
+}
+.mr-12 {
+    margin-right: 12px;
+}
+.mr-top-2 {
+    margin-top: 2px;
 }
 .help {
     color: var(--n-feedback-text-color);
