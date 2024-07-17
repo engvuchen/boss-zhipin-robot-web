@@ -37,7 +37,7 @@ body {
 }
 .title {
     font-weight: 500;
-    margin-bottom: 2rem;
+    margin: 0 0 2rem 0;
     color: #4e9e5f;
 }
 </style>

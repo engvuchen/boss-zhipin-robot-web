@@ -56,19 +56,18 @@ const excludeJobs = [
 const bossActiveOptions = ['1个月内活跃', '3个月内活跃', '半年内活跃', '无限制'];
 
 let defaultValues = {
-    queryParams: 'https://www.zhipin.com/web/geek/job999',
+    queryParams: 'https://www.zhipin.com/web/geek/job',
     helloTxt:
         '面试官您好！看到贵司在前端工程师的岗位，而我过往经历中，有1年小程序开发经验，2年管理端开发经验，我的过往经历跟贵司的匹配度是非常高的。而我目前已经离职，最快到岗时间是一周以内，非常期待贵司能给我一个面试机会，展示一下自己。若您对我的微简历有什么疑问，我随时在线解答。',
     wt2Cookie: '',
     targetNum: 2,
-    timeout: 3,
+    timeout: 5,
     keySkills: [],
     salaryRange: [0, 100],
     bossActiveType: '3个月内活跃',
     excludeCompanies: defaultExcludeCompanies,
     excludeJobs: ['外包', '派遣'],
     headless: false,
-    _name: '暂无配置',
 };
 
 const SALARY_RANGE_MAP = {
@@ -100,6 +99,69 @@ const DEGREE_MAP = {
     205: '博士',
 };
 
+const cityList = [
+    {
+        code: 100010000,
+        name: '全国',
+    },
+    {
+        code: 101010100,
+        name: '北京',
+    },
+    {
+        code: 101020100,
+        name: '上海',
+    },
+    {
+        code: 101280100,
+        name: '广州',
+    },
+    {
+        code: 101280600,
+        name: '深圳',
+    },
+    {
+        code: 101210100,
+        name: '杭州',
+    },
+    {
+        code: 101030100,
+        name: '天津',
+    },
+    {
+        code: 101110100,
+        name: '西安',
+    },
+    {
+        code: 101190400,
+        name: '苏州',
+    },
+    {
+        code: 101200100,
+        name: '武汉',
+    },
+    {
+        code: 101230200,
+        name: '厦门',
+    },
+    {
+        code: 101250100,
+        name: '长沙',
+    },
+    {
+        code: 101270100,
+        name: '成都',
+    },
+    {
+        code: 101180100,
+        name: '郑州',
+    },
+    {
+        code: 101040100,
+        name: '重庆',
+    },
+];
+
 export {
     keySkills,
     excludeCompanies,
@@ -109,4 +171,5 @@ export {
     SALARY_RANGE_MAP,
     EXPERIENCE_MAP,
     DEGREE_MAP,
+    cityList,
 };

@@ -54,3 +54,7 @@
 .btn-group .btn-group__select {
     width: 300px;
 }
+
+:deep(.light td) {
+    color: var(--n-color-target);
+}

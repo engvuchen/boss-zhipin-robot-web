@@ -6,6 +6,22 @@ function isFake(target) {
     return [undefined, null, ''].includes(target);
 }
 
+function deepClone(target) {
+    return JSON.parse(JSON.stringify(target));
+}
+
+function debounce(fn, delay = 300) {
+    let timeout;
+
+    return function (...args) {
+        clearTimeout(timeout);
+
+        timeout = setTimeout(() => {
+            fn.apply(this, args);
+        }, delay);
+    };
+}
+
 // post 用 formData 不恰当，formData 是用来传送文件的；
 function request({
     url = '',
@@ -58,4 +74,5 @@ function request({
         };
     });
 }
-export { isFake, request };
+
+export { isFake, deepClone, debounce, request };
