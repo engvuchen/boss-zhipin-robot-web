@@ -1,5 +1,6 @@
 <template>
     <div>
+        <!--  表单 -->
         <n-form
             ref="formRef"
             :model="modelRef"
@@ -57,11 +58,11 @@
             <n-form-item
                 path="salaryRange"
                 label="薪酬区间（K）"
-                :feedback="`可在 [${salaryMin}, 100] 自定义薪酬，若岗位薪酬区间与此区间有交集，则匹配。当前薪酬枚举 [${salaryMin}, ${salaryMax}]`"
+                :feedback="`自定义薪酬，若岗位薪酬区间与此区间有交集，则匹配。岗位薪酬枚举：${salaryEnumStr}`"
             >
                 <n-slider
                     v-model:value="modelRef.salaryRange"
-                    :min="salaryMin"
+                    :min="0"
                     :max="100"
                     range
                     :step="1"
@@ -123,11 +124,26 @@
                 <n-switch v-model:value="modelRef.headless" :checked-value="false" unchecked-value="new" />
             </n-form-item>
 
-            <div class="flex justify-end" style="width: 100%">
-                <n-button round type="primary" :disabled="btnDisabled" @click="onSubmit">启动任务</n-button>
-            </div>
+            <n-form-item>
+                <div class="flex flex-column align-end" style="width: 100%">
+                    <div class="btn-group flex justify-end" style="width: 100%">
+                        <n-select
+                            v-model:value="confIndex"
+                            :options="confSelectOpts"
+                            filterable
+                            class="btn-group__select mr-4"
+                            @update="onConfChange"
+                        />
+                        <n-button-group class="mr-20">
+                            <n-button ghost @click="showManageModal = !showManageModal">管理</n-button>
+                        </n-button-group>
+                        <n-button round type="primary" :disabled="btnDisabled" @click="onSubmit">启动任务</n-button>
+                    </div>
+                    <div class="help mt-8">“启动任务”会尝试新建一个配置</div>
+                </div>
+            </n-form-item>
         </n-form>
-
+        <!-- 服务日志 -->
         <n-form
             v-if="messageList.length"
             label-width="120"
@@ -145,14 +161,42 @@
                 />
             </n-form-item>
         </n-form>
+
+        <!-- 模态框-配置管理 -->
+        <n-modal :show="showManageModal">
+            <n-card style="width: 600px" title="模态框" size="huge" :bordered="false" role="dialog" aria-modal="true">
+                <n-data-table
+                    :bordered="false"
+                    :single-line="false"
+                    :columns="columns"
+                    :data="confList"
+                    :pagination="{
+                        pageSize: 10,
+                    }"
+                />
+                <n-button @click="showManageModal = !showManageModal">关闭</n-button>
+            </n-card>
+        </n-modal>
     </div>
 </template>
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue';
-import { useMessage } from 'naive-ui';
+import { ref, computed, onMounted, nextTick, h } from 'vue';
+import SparkMD5 from 'spark-md5';
+import { useMessage, NInput } from 'naive-ui';
 import { isFake, request } from '@/util';
 const message = useMessage();
-import { keySkills, excludeJobs, excludeCompanies, bossActiveOptions, defaultValues, SALARY_RANGE_MAP } from './enums';
+import {
+    keySkills,
+    excludeJobs,
+    excludeCompanies,
+    bossActiveOptions,
+    defaultValues,
+    SALARY_RANGE_MAP,
+    EXPERIENCE_MAP,
+    DEGREE_MAP,
+} from './enums';
+
+import cityList from './city.js';
 
 const rules = {
     queryParams: [
@@ -162,20 +206,7 @@ const rules = {
             validator(rule, value) {
                 let reg = new RegExp('https://www.zhipin.com/web/geek/job');
                 if (!reg.test(value)) {
-                    return new Error('应为网址');
-                }
-                return true;
-            },
-        },
-    ],
-    targetNum: [
-        {
-            required: true,
-            type: 'number',
-            trigger: ['blur', undefined],
-            validator(rule, value) {
-                if (!/^[1-9][0-9]*$/.test(value)) {
-                    return new Error('应为正整数');
+                    return new Error('应为 BOSS 网址');
                 }
                 return true;
             },
@@ -200,12 +231,50 @@ let requiredNames = Object.keys(rules).reduce((accu, key) => {
     return accu;
 }, []);
 
+const columns = [
+    {
+        title: '名称',
+        key: '_name',
+    },
+    {
+        title: '别名',
+        key: '_alias',
+        render(row) {
+            return h(
+                NInput,
+                {
+                    placeholder: '显示优先级高于名称',
+                },
+                { default: () => row._alias || '' }
+            );
+        },
+    },
+];
+
 // Dom
 const serverLogsNode = ref(null);
 // Data
-const salaryMin = ref(undefined);
-const salaryMax = ref(Infinity); // 10-20K，可以把 15-30K 筛选出来，薪酬终点限制感觉没必要
+let confIndex = ref(0);
+let confList = ref([]);
+const confSelectOpts = computed(() => {
+    if (confList.value.length) {
+        return confList.value.map((curr, index) => ({
+            label: curr._name || `配置${index + 1}`,
+            value: index,
+        }));
+    }
+    return [{ label: '暂无配置', value: 0 }];
+});
+function onConfChange() {
+    confList.value.forEach((curr, index) => {
+        if (index !== confIndex.value) delete curr._active;
+        curr._active = true;
+    });
+}
 
+const showManageModal = ref(false);
+const salaryMin = ref(0);
+const salaryMax = ref(100); // 10-20K，可以把 15-30K 筛选出来
 const formRef = ref(null);
 const modelRef = ref(getMod());
 const messageList = ref([]);
@@ -218,11 +287,18 @@ const btnDisabled = computed(() => {
 const messageListStr = computed(() => {
     return messageList.value.join('\n');
 });
+let salaryEnumStr = computed(() => {
+    if (salaryMin.value === 0 && salaryMax.value === 100) {
+        return '无';
+    } else {
+        return `[${salaryMin.value}, ${salaryMax.value}]`;
+    }
+});
 
 // LifeCycle
 onMounted(() => {
     initWs();
-    onQueryParamsChange(null, true);
+    onQueryParamsChange();
 });
 // Method
 function initWs() {
@@ -258,89 +334,124 @@ async function onSubmit(e) {
     }
 
     let sendData = JSON.parse(JSON.stringify(modelRef._value));
-    localStorage.setItem('zhipin-robot', JSON.stringify(sendData));
+    padCustomData(sendData, true);
+
+    if (!confList.value.find(curr => curr._hash === sendData._hash)) {
+        sendData._active = true;
+        confList.value.unshift(sendData);
+        confIndex.value = 0;
+    }
+
+    localStorage.setItem('zhipin-robot', JSON.stringify(confList.value));
+
+    return;
 
     waitAutoSendHello.value = true;
-
-    let res = await request({
+    await request({
         url: '/api/send',
         method: 'POST',
         data: sendData,
     });
     waitAutoSendHello.value = false;
 
-    if (res?.code !== 0) {
-        return message.error(res?.msg || '');
-    }
+    // if (res?.code !== 0) return message.error(res?.msg || '');
 }
+
 function onQueryParamsChange(e, init = false) {
     let { queryParams = '' } = modelRef._value;
     if (!queryParams) return;
 
-    let [min = 0, max = Infinity] = getSalary(queryParams);
+    let [min = 0, max = 100] = getSalary(queryParams);
     salaryMin.value = min;
     salaryMax.value = max;
+}
+function getMod() {
+    let list = JSON.parse(localStorage.getItem('zhipin-robot') || '[]');
+    if (!Array.isArray(list)) list = [list]; // 兼容之前只有一个配置
+    if (!list.length) return [defaultValues];
 
-    if (!init) {
-        modelRef.value.salaryRange = [min, 100];
+    let selectConf = list[0];
+
+    for (let i = 0; i < list.length; i++) {
+        let obj = list[i];
+        console.log('🔎 ~ getMod ~ obj:', obj);
+        if (obj._active) {
+            selectConf = obj;
+            confIndex.value = i;
+        }
+        padCustomData(obj);
+
+        list[i] = Object.assign({}, defaultValues, obj);
+        // Object.assign(list[i], {}, defaultValues, obj); // 这样有问题
     }
+
+    confList.value = list;
+
+    return selectConf;
 }
 
-function getMod() {
-    let mod = Object.assign(defaultValues, JSON.parse(localStorage.getItem('zhipin-robot') || '{}'));
-    return mod;
+function getMsgFormLink(queryParams, list = []) {
+    let params = new URLSearchParams(queryParams);
+
+    return list.reduce((obj, key) => {
+        let result = params.get(key);
+        obj[key] = result === null ? '' : result;
+        return obj;
+    }, {});
 }
 function getSalary(queryParams = '') {
-    let params = new URLSearchParams(queryParams);
-    let salary = params.get('salary');
+    let { salary } = getMsgFormLink(queryParams, ['salary']);
     return SALARY_RANGE_MAP[salary] || [];
+}
+function deepClone(target) {
+    return JSON.parse(JSON.stringify(target));
+}
+// 不需要
+function getPureData(target) {
+    let newObj = deepClone(target);
+    delete newObj._active;
+    delete newObj._name;
+    delete newObj._alias;
+    delete newObj._hash;
+    return newObj;
+}
+function getHash(target) {
+    return SparkMD5.hash(JSON.stringify(getPureData(target)));
+}
+/** 填充 _name、_hash */
+function padCustomData(target, needHash = false) {
+    console.log('🔎 ~ padCustomData ~ padCustomData:');
+
+    if (!target._hash || needHash) target._hash = getHash(target);
+
+    // 从链接获取名称, 覆盖默认名称
+    let {
+        query = '未填',
+        city = '城市不限',
+        experience = '经验不限',
+        salary = '薪资不限',
+        degree = '学历不限',
+    } = getMsgFormLink(target.queryParams, ['query', 'city', 'experience', 'salary']);
+
+    query = decodeURIComponent(query);
+    city = cityList.find(curr => curr.code === +city)?.name || city;
+
+    let experienceStr = experience
+        .split(',')
+        .map(val => EXPERIENCE_MAP[val])
+        .join(',');
+    let salaryStr = SALARY_RANGE_MAP[salary]?.join('-'); // 薪水只能选一个
+    let degreeStr = degree
+        .split(',')
+        .map(val => DEGREE_MAP[val])
+        .join(',');
+
+    let nameFormLink = [query, city, experienceStr, salaryStr, degreeStr].filter(str => str).join('_');
+    if (nameFormLink) target._name = nameFormLink;
+
+    if (!target._name) target._name = `配置_${Math.floor(Math.random() * 100)}`;
 }
 </script>
 <style scoped>
-.code {
-    box-sizing: border-box;
-    padding: 10px;
-    border-radius: 4px;
-    min-width: 500px;
-    min-height: 470px;
-
-    line-height: 2;
-    font-size: 14px;
-    font-family: consolas, monaco, monospace;
-    tab-size: 2;
-
-    word-wrap: break-word;
-    word-break: break-all;
-}
-.form >>> .n-form-item-feedback__line {
-    margin-bottom: 20px;
-}
-
-.flex {
-    display: flex;
-}
-.flex-column {
-    flex-direction: column;
-}
-.justify-center {
-    justify-content: center;
-}
-.justify-end {
-    justify-content: flex-end;
-}
-.align-top {
-    align-items: flex-start;
-}
-.mb-4 {
-    margin-bottom: 4px;
-}
-.mr-12 {
-    margin-right: 12px;
-}
-.mr-top-2 {
-    margin-top: 2px;
-}
-.help {
-    color: var(--n-feedback-text-color);
-}
+@import './Main.css';
 </style>

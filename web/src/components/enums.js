@@ -55,8 +55,8 @@ const excludeJobs = [
 ];
 const bossActiveOptions = ['1个月内活跃', '3个月内活跃', '半年内活跃', '无限制'];
 
-const defaultValues = {
-    queryParams: 'https://www.zhipin.com/web/geek/job',
+let defaultValues = {
+    queryParams: 'https://www.zhipin.com/web/geek/job999',
     helloTxt:
         '面试官您好！看到贵司在前端工程师的岗位，而我过往经历中，有1年小程序开发经验，2年管理端开发经验，我的过往经历跟贵司的匹配度是非常高的。而我目前已经离职，最快到岗时间是一周以内，非常期待贵司能给我一个面试机会，展示一下自己。若您对我的微简历有什么疑问，我随时在线解答。',
     wt2Cookie: '',
@@ -69,6 +69,7 @@ const defaultValues = {
     excludeCompanies: defaultExcludeCompanies,
     excludeJobs: ['外包', '派遣'],
     headless: false,
+    _name: '暂无配置',
 };
 
 const SALARY_RANGE_MAP = {
@@ -79,5 +80,34 @@ const SALARY_RANGE_MAP = {
     406: [20, 50],
     407: [50, 100], // slider 不支持 [50, Infinity]，写死 100
 };
+// experience=108,102,101,103,104,105,106,107
+const EXPERIENCE_MAP = {
+    108: '初中及以下',
+    102: '中专/中技',
+    103: '高中',
+    104: '大专',
+    105: '本科',
+    106: '硕士',
+    107: '博士',
+};
+// degree=209,208,206,202,203,204,205
+const DEGREE_MAP = {
+    209: '在校生',
+    208: '应届生',
+    206: '经验不限',
+    202: '1年以内',
+    203: '本科',
+    204: '硕士',
+    205: '博士',
+};
 
-export { keySkills, excludeCompanies, excludeJobs, bossActiveOptions, defaultValues, SALARY_RANGE_MAP };
+export {
+    keySkills,
+    excludeCompanies,
+    excludeJobs,
+    bossActiveOptions,
+    defaultValues,
+    SALARY_RANGE_MAP,
+    EXPERIENCE_MAP,
+    DEGREE_MAP,
+};
