@@ -154,7 +154,7 @@
             <n-form-item label="服务日志">
                 <n-input
                     ref="serverLogsNode"
-                    v-model:value="messageListStr"
+                    :value="messageListStr"
                     type="textarea"
                     class="code"
                     @keydown.enter.prevent
@@ -313,7 +313,7 @@ function initWs() {
     wss.onmessage = async event => {
         messageList.value.push(event.data);
         await nextTick();
-        // textareaElRef 是组件内的 ref；通过父组件 ref 访问它，又不需要通过 .value 获取 DOM
+        // textareaElRef 是组件内的 ref
         if (serverLogsNode.value?.textareaElRef.scrollHeight) {
             serverLogsNode.value.textareaElRef.scrollTop = serverLogsNode.value?.textareaElRef.scrollHeight;
         }
