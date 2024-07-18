@@ -47,6 +47,12 @@
 .mt-8 {
     margin-top: 8px;
 }
+.w-80 {
+    width: 80px;
+}
+.w-330 {
+    width: 330px;
+}
 .help {
     color: var(--n-feedback-text-color);
 }
@@ -57,4 +63,7 @@
 
 :deep(.light td) {
     color: var(--n-color-target);
+}
+:deep(td.long) {
+    min-width: 330px;
 }

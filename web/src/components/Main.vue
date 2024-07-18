@@ -12,6 +12,25 @@
             }"
             class="form"
         >
+            <n-form-item>
+                <div class="flex justify-end" style="width: 100%">
+                    <n-select
+                        v-model:value="activeConfIndex"
+                        :options="confSelectOpts"
+                        filterable
+                        :disabled="false"
+                        class="w-330 mr-4"
+                        @update:value="onConfChange"
+                    />
+                    <n-button-group class="mr-20">
+                        <n-button ghost @click="showManageModal = !showManageModal" style="width: 80px">管理</n-button>
+                    </n-button-group>
+                    <n-button-group>
+                        <n-button ghost @click="onCreate('copy')" class="w-80" style="width: 80px">复制</n-button>
+                        <n-button ghost @click="onCreate('new')" class="w-80" style="width: 80px">新建草稿</n-button>
+                    </n-button-group>
+                </div>
+            </n-form-item>
             <!-- queryParams -->
             <n-form-item
                 path="queryParams"
@@ -137,21 +156,8 @@
             <n-form-item>
                 <div class="flex flex-column align-end" style="width: 100%">
                     <div class="btn-group flex justify-end" style="width: 100%">
-                        <n-select
-                            v-model:value="activeConfIndex"
-                            :options="confSelectOpts"
-                            filterable
-                            class="btn-group__select mr-4"
-                            @update:value="onConfChange"
-                        />
-                        <n-button-group class="mr-20">
-                            <n-button ghost @click="showManageModal = !showManageModal" style="width: 80px"
-                                >管理</n-button
-                            >
-                            <n-button ghost @click="saveListToStorage" style="width: 80px">更新</n-button>
-                            <n-button ghost @click="onCreate" style="width: 80px">添加+</n-button>
-                        </n-button-group>
-                        <n-button round type="primary" :disabled="btnDisabled" @click="onSubmit">启动任务</n-button>
+                        <n-button @click="saveListToStorage" class="mr-20" style="width: 80px">保存</n-button>
+                        <n-button type="primary" :disabled="btnDisabled" @click="onSubmit">启动任务</n-button>
                     </div>
                     <!-- <div class="help mt-8">若配置有变动（名称、别名除外），“保存”、“启动任务”会尝试新建一个配置</div> -->
                 </div>
@@ -177,7 +183,7 @@
         </n-form>
         <!-- 模态框-配置管理 -->
         <n-modal :show="showManageModal" :auto-focus="false">
-            <n-card style="width: 600px" title="管理" size="huge" :bordered="false" role="dialog" aria-modal="true">
+            <n-card style="width: 900px" title="管理" size="huge" :bordered="false" role="dialog" aria-modal="true">
                 <n-data-table
                     :bordered="true"
                     :single-line="true"
@@ -195,7 +201,7 @@
                 />
                 <div class="flex justify-center">
                     <n-button @click="showManageModal = !showManageModal" class="mr-20">取消</n-button>
-                    <n-button type="primary" @click="saveListToStorage">保存</n-button>
+                    <n-button type="primary" @click="saveListToStorage">别名保存</n-button>
                 </div>
             </n-card>
         </n-modal>
@@ -203,9 +209,8 @@
 </template>
 <script setup>
 import { ref, watch, computed, onMounted, nextTick, h } from 'vue';
-import SparkMD5 from 'spark-md5';
 import { useMessage, NInput, NButton } from 'naive-ui';
-import { isFake, deepClone, debounce, request } from '@/util';
+import { isFake, deepClone, request } from '@/util';
 const message = useMessage();
 import {
     keySkills,
@@ -271,7 +276,8 @@ watch(
             confSelectOpts.value = [{ label: '暂无配置', value: 0 }];
         }
 
-        activeConfIndex.value = newConfList.findIndex(curr => curr._active);
+        let index = newConfList.findIndex(curr => curr._active);
+        activeConfIndex.value = index > -1 ? index : 0;
     },
     { deep: true }
 );
@@ -318,10 +324,12 @@ const columns = [
     {
         title: '名称',
         key: '_name',
+        className: 'long',
     },
     {
         title: '别名',
         key: '_alias',
+        className: 'long',
         render(row, index) {
             return h(NInput, {
                 value: row._alias || '',
@@ -355,7 +363,6 @@ const columns = [
                         if (confList.value.length) {
                             if (!confList.value.find(curr => curr._active)) {
                                 confList.value[0]._active = true;
-                                // activeConfIndex.value = 0;
                                 modelRef.value = confList.value[0];
                             }
                         } else {
@@ -374,7 +381,7 @@ const columns = [
 // LifeCycle
 onMounted(() => {
     initWs();
-    onQueryParamsChange();
+    onQueryParamsChange(modelRef.value.queryParams);
 });
 
 // Method
@@ -396,16 +403,55 @@ function initWs() {
         }
     };
 }
+function getMod() {
+    let list = JSON.parse(localStorage.getItem('zhipin-robot') || '[]');
 
-function onCreate() {
-    let sendData = deepClone(modelRef._value);
-    padCustomData(sendData, true);
+    if (!Array.isArray(list)) list = [list]; // 兼容之前只有一个配置
+
+    if (!list.length) {
+        let newConf = paddCustomData(deepClone(defaultValues));
+        newConf._active = true;
+        confList.value = [newConf];
+        return newConf;
+    }
+
+    let activeIndex = 0;
+    for (let i = 0; i < list.length; i++) {
+        let obj = list[i];
+        paddCustomData(obj);
+
+        if (obj._active) activeIndex = i;
+
+        list[i] = {
+            ...defaultValues,
+            ...obj,
+        };
+    }
+    if (!list.find(curr => curr._active)) {
+        list[0]._active = true;
+    }
+
+    confList.value = list;
+
+    return confList.value[activeIndex];
+}
+
+function onCreate(type = 'new') {
+    let data = type === 'new' ? deepClone(defaultValues) : deepClone(modelRef.value);
+    delete data._alias;
+
+    paddCustomData(data, {
+        resetId: true,
+        resetName: true,
+    });
 
     confList.value.forEach(curr => delete curr._active);
-    sendData._active = true;
-    confList.value.unshift(sendData);
+    data._active = true;
+    if (type === 'copy') {
+        data._name = `${data._name}_1`;
+    }
 
-    saveListToStorage();
+    confList.value.unshift(data);
 }
 async function onSubmit(e) {
     e.preventDefault();
@@ -422,9 +468,14 @@ async function onSubmit(e) {
         return false;
     }
 
+    let sendData = modelRef._value;
+    paddCustomData(sendData, {
+        resetId: false,
+        resetName: true,
+    });
+
     saveListToStorage();
 
-    let sendData = deepClone(modelRef._value);
     waitAutoSendHello.value = true;
     await request({
         url: '/api/send',
@@ -439,80 +490,68 @@ function saveListToStorage() {
     localStorage.setItem('zhipin-robot', JSON.stringify(confList.value));
 }
 
-function getMod() {
-    let list = JSON.parse(localStorage.getItem('zhipin-robot') || '[]');
-    if (!Array.isArray(list)) list = [list]; // 兼容之前只有一个配置
-    if (!list.length) return padCustomData(defaultValues);
+function onQueryParamsChange(data) {
+    if (!data) return;
 
-    let selectConf = list[0];
-
-    for (let i = 0; i < list.length; i++) {
-        let obj = list[i];
-        if (obj._active) {
-            selectConf = obj;
-            // activeConfIndex.value = i;
-        }
-        padCustomData(obj);
-
-        list[i] = {
-            ...defaultValues,
-            ...obj,
-        };
-    }
-
-    confList.value = list;
-
-    return selectConf;
-}
-function onQueryParamsChange(e, init = false) {
-    let { queryParams = '' } = modelRef._value;
-    if (!queryParams) return;
-
-    let [min = 0, max = 100] = getSalary(queryParams);
+    let [min = 0, max = 100] = getSalary(data);
     salaryMin.value = min;
     salaryMax.value = max;
+
+    let currConf = confList.value[activeConfIndex.value];
+
+    let newName = getConfName(data);
+
+    if (newName) currConf._name = newName;
 }
 function getSalary(queryParams = '') {
     let { salary } = getMsgFormLink(queryParams, ['salary']);
     return SALARY_RANGE_MAP[salary] || [];
 }
-/** 若没有 _name，生成它们 */
-function padCustomData(target, reset = false) {
+/** 生成 _id; 若没有 _name，生成它们 */
+function paddCustomData(target, { resetId = false, resetName = false } = {}) {
     let uid = Math.ceil(Math.random() * 1000);
-    target._id = uid;
 
-    if (!target._name || reset) {
-        target._name = `配置_${uid}`;
-
-        // 从链接获取名称, 覆盖默认名称
-        let {
-            query = '未填',
-            city = '城市不限',
-            experience = '经验不限',
-            salary = '薪资不限',
-            degree = '学历不限',
-        } = getMsgFormLink(target.queryParams, ['query', 'city', 'experience', 'salary']);
-        query = decodeURIComponent(query);
-        city = cityList.find(curr => curr.code === +city)?.name || city;
-        let experienceStr = experience
-            .split(',')
-            .map(val => EXPERIENCE_MAP[val])
-            .join(',');
-        let salaryStr = SALARY_RANGE_MAP[salary]?.join('-'); // 薪水只能选一个
-        let degreeStr = degree
-            .split(',')
-            .map(val => DEGREE_MAP[val])
-            .join(',');
-
-        let nameFormLink = [query, city, experienceStr, salaryStr, degreeStr].filter(str => str).join('_');
-        if (nameFormLink) target._name = nameFormLink;
+    if (!target._id || resetId) target._id = uid;
+    if (!target._name || resetName) {
+        target._name = getConfName(target.queryParams) || `配置_${uid}`;
     }
+
+    return target;
 }
-function getMsgFormLink(queryParams, list = []) {
-    let params = new URLSearchParams(queryParams);
+function getConfName(link = '') {
+    if (!link) return '';
+
+    // 从链接获取名称, 覆盖默认名称
+    let {
+        query = '未填',
+        city = '城市不限',
+        degree = '学历不限',
+        experience = '经验不限',
+        salary = '薪资不限',
+    } = getMsgFormLink(link, ['query', 'city', 'degree', 'experience', 'salary']);
+
+    city = cityList.find(curr => curr.code === +city)?.name || city;
+
+    let experienceStr = experience
+        .split(',')
+        .map(val => EXPERIENCE_MAP[val])
+        .join(',');
+    let salaryStr = SALARY_RANGE_MAP[salary]?.map(str => `${str}K`)?.join('-'); // 薪水只能选一个
+
+    let degreeStr = degree
+        .split(',')
+        .map(val => DEGREE_MAP[val])
+        .join(',');
+
+    let nameFormLink = [query, city, degreeStr, experienceStr, salaryStr].filter(str => str).join('_');
+
+    return nameFormLink;
+}
+function getMsgFormLink(link, list = []) {
+    let params = new URL(decodeURIComponent(link)); // 直接 UrlSearchParam 获取不到中文
 
     return list.reduce((obj, key) => {
-        let result = params.get(key);
+        let result = params.searchParams.get(key);
         obj[key] = result === null ? '' : result;
         return obj;
     }, {});
