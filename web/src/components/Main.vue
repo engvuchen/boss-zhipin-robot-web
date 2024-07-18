@@ -200,8 +200,8 @@
                     "
                 />
                 <div class="flex justify-center">
-                    <n-button @click="showManageModal = !showManageModal" class="mr-20">取消</n-button>
-                    <n-button type="primary" @click="saveListToStorage">别名保存</n-button>
+                    <n-button @click="showManageModal = !showManageModal" class="mr-20">关闭</n-button>
+                    <n-button type="primary" @click="saveListToStorage">保存</n-button>
                 </div>
             </n-card>
         </n-modal>
@@ -210,7 +210,7 @@
 <script setup>
 import { ref, watch, computed, onMounted, nextTick, h } from 'vue';
 import { useMessage, NInput, NButton } from 'naive-ui';
-import { isFake, deepClone, request } from '@/util';
+import { isFake, deepClone, request, notifyMe } from '@/util';
 const message = useMessage();
 import {
     keySkills,
@@ -369,7 +369,7 @@ const columns = [
                             modelRef.value = deepClone(defaultValues);
                         }
 
-                        saveListToStorage();
+                        // saveListToStorage();
                     },
                 },
                 { default: () => '删除' }
@@ -389,6 +389,7 @@ function initWs() {
     // 此处 new ，触发一次 wss connection
     const ip = import.meta.env.BOSS_IP || 'localhost';
     const port = import.meta.env.BOSS_PORT || '3000';
+    let stopKeyWords = ['执行出错', '顺利完成'];
 
     let wss = new WebSocket(`ws://${ip}:${port}`);
     wss.onopen = function (event) {
@@ -396,6 +397,14 @@ function initWs() {
     };
     wss.onmessage = async event => {
         messageList.value.push(event.data);
+
+        let foundKey = stopKeyWords.find(key => event.data.includes(key));
+        if (foundKey) {
+            notifyMe(foundKey, {
+                body: event.data,
+            });
+        }
+
         await nextTick();
         // textareaElRef 是组件内的 ref
         if (serverLogsNode.value?.textareaElRef.scrollHeight) {

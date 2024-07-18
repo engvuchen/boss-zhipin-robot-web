@@ -22,6 +22,30 @@ function debounce(fn, delay = 300) {
     };
 }
 
+/**
+ * 显示浏览器通知
+ * @param {String} title 通知标题
+ * @param {*} param1 { dir(文字方向), body(消息主题), icon(通知图标) requireInteraction(不自动关闭通知) }
+ */
+async function notifyMe(
+    title = '通知标题',
+    { dir = 'auto', body = '消息体', icon = '', requireInteraction = false } = {}
+) {
+    // 检查浏览器是否支持
+    if (!window.Notification) return console.log('浏览器不支持通知');
+
+    // 请求用户权限来显示通知; 用户同意授权，则显示通知
+    let permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+        new Notification(title, {
+            dir,
+            body,
+            icon,
+            requireInteraction,
+        });
+    }
+}
+
 // post 用 formData 不恰当，formData 是用来传送文件的；
 function request({
     url = '',
@@ -75,4 +99,4 @@ function request({
     });
 }
 
-export { isFake, deepClone, debounce, request };
+export { isFake, deepClone, debounce, request, notifyMe };
