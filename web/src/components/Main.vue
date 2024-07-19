@@ -269,8 +269,6 @@ let confSelectOpts = ref([{ label: '暂无配置', value: 0 }]);
 watch(
     confList,
     (newConfList, oldConfList) => {
-        console.log('🔎 ~ newConfList:', newConfList);
-
         confSelectOpts.value = newConfList.map((curr, index) => ({
             label: curr._alias || curr._name || '',
             value: index,
@@ -280,8 +278,6 @@ watch(
         }
 
         let index = newConfList.findIndex(curr => curr._active);
-        console.log('🔎 ~ active index:', index);
-
         activeConfIndex.value = index > -1 ? index : 0;
     },
     { deep: true }
@@ -373,8 +369,6 @@ const columns = [
                         } else {
                             modelRef.value = deepClone(defaultValues);
                         }
-
-                        // saveListToStorage();
                     },
                 },
                 { default: () => '删除' }
@@ -447,15 +441,13 @@ function getMod() {
         activeIndex = 0;
     }
 
-    console.log('list', list);
-
     confList.value = list;
-
     return confList.value[activeIndex];
 }
 
 function onCreate(type = 'new') {
     let data = type === 'new' ? deepClone(defaultValues) : deepClone(modelRef.value);
+
     delete data._alias;
     data._active = true;
 
@@ -466,9 +458,9 @@ function onCreate(type = 'new') {
     if (type === 'copy') data._name = `${data._name}_1`;
 
     confList.value.forEach(curr => delete curr._active);
-    // confList.value.unshift(ref(data));
+    confList.value.unshift(data);
 
-    confList.value.unshift(data); // todo
+    modelRef.value = data;
 }
 async function onSubmit(e) {
     e.preventDefault();
@@ -504,8 +496,6 @@ async function onSubmit(e) {
     // if (res?.code !== 0) return message.error(res?.msg || '');
 }
 function saveListToStorage() {
-    console.log('333', confList.value, JSON.stringify(confList.value)); // 存的时候就不对了
-
     localStorage.setItem('zhipin-robot', JSON.stringify(confList.value));
 }
 
@@ -559,8 +549,6 @@ function getConfName(link = '', uid = 0) {
         .join(',');
 
     let nameFormLink = [uid, query, city, degreeStr, experienceStr, salaryStr].filter(str => str).join('_');
-    console.log('🔎 ~ getConfName ~ nameFormLink:', uid, nameFormLink);
-
     return nameFormLink;
 }
 function getMsgFormLink(link, list = []) {
