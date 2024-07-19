@@ -150,7 +150,7 @@
             </n-form-item>
             <!-- headless -->
             <n-form-item path="headless" label="观察打招呼过程">
-                <n-switch v-model:value="modelRef.headless" />
+                <n-switch v-model:value="modelRef.headless" :checked-value="false" unchecked-value="new" />
             </n-form-item>
             <!-- 按钮组 -->
             <n-form-item>
@@ -478,10 +478,6 @@ async function onSubmit(e) {
     }
 
     let sendData = deepClone(modelRef._value);
-    if (sendData.headless) sendData.headless = 'new';
-    // paddCustomData(sendData, {
-    //     resetName: true,
-    // });
 
     saveListToStorage();
 
