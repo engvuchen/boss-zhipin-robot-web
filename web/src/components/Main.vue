@@ -150,7 +150,7 @@
             </n-form-item>
             <!-- headless -->
             <n-form-item path="headless" label="观察打招呼过程">
-                <n-switch v-model:value="modelRef.headless" :checked-value="false" unchecked-value="new" />
+                <n-switch v-model:value="modelRef.headless" />
             </n-form-item>
             <!-- 按钮组 -->
             <n-form-item>
@@ -192,6 +192,7 @@
                     :pagination="{
                         pageSize: 10,
                     }"
+                    :row-key="row => row._id"
                     :row-class-name="
                         row => {
                             if (row._active) return 'light';
@@ -268,6 +269,8 @@ let confSelectOpts = ref([{ label: '暂无配置', value: 0 }]);
 watch(
     confList,
     (newConfList, oldConfList) => {
+        console.log('🔎 ~ newConfList:', newConfList);
+
         confSelectOpts.value = newConfList.map((curr, index) => ({
             label: curr._alias || curr._name || '',
             value: index,
@@ -277,6 +280,8 @@ watch(
         }
 
         let index = newConfList.findIndex(curr => curr._active);
+        console.log('🔎 ~ active index:', index);
+
         activeConfIndex.value = index > -1 ? index : 0;
     },
     { deep: true }
@@ -414,17 +419,18 @@ function initWs() {
 }
 function getMod() {
     let list = JSON.parse(localStorage.getItem('zhipin-robot') || '[]');
-
-    if (!Array.isArray(list)) list = [list]; // 兼容之前只有一个配置
-
+    // 兼容之前只有一个配置
+    if (!Array.isArray(list)) {
+        list = [list];
+    }
     if (!list.length) {
-        let newConf = paddCustomData(deepClone(defaultValues));
+        let newConf = paddCustomData(deepClone(defaultValues), { resetName: true });
         newConf._active = true;
         confList.value = [newConf];
         return newConf;
     }
 
-    let activeIndex = 0;
+    let activeIndex;
     for (let i = 0; i < list.length; i++) {
         let obj = list[i];
         paddCustomData(obj);
@@ -436,9 +442,12 @@ function getMod() {
             ...obj,
         };
     }
-    if (!list.find(curr => curr._active)) {
+    if (activeIndex === undefined) {
         list[0]._active = true;
+        activeIndex = 0;
     }
+
+    console.log('list', list);
 
     confList.value = list;
 
@@ -448,19 +457,18 @@ function getMod() {
 function onCreate(type = 'new') {
     let data = type === 'new' ? deepClone(defaultValues) : deepClone(modelRef.value);
     delete data._alias;
+    data._active = true;
 
     paddCustomData(data, {
         resetId: true,
         resetName: true,
     });
+    if (type === 'copy') data._name = `${data._name}_1`;
 
     confList.value.forEach(curr => delete curr._active);
-    data._active = true;
-    if (type === 'copy') {
-        data._name = `${data._name}_1`;
-    }
+    // confList.value.unshift(ref(data));
 
-    confList.value.unshift(data);
+    confList.value.unshift(data); // todo
 }
 async function onSubmit(e) {
     e.preventDefault();
@@ -477,11 +485,11 @@ async function onSubmit(e) {
         return false;
     }
 
-    let sendData = modelRef._value;
-    paddCustomData(sendData, {
-        resetId: false,
-        resetName: true,
-    });
+    let sendData = deepClone(modelRef._value);
+    if (sendData.headless) sendData.headless = 'new';
+    // paddCustomData(sendData, {
+    //     resetName: true,
+    // });
 
     saveListToStorage();
 
@@ -496,38 +504,36 @@ async function onSubmit(e) {
     // if (res?.code !== 0) return message.error(res?.msg || '');
 }
 function saveListToStorage() {
+    console.log('333', confList.value, JSON.stringify(confList.value)); // 存的时候就不对了
+
     localStorage.setItem('zhipin-robot', JSON.stringify(confList.value));
 }
 
 function onQueryParamsChange(data) {
-    if (!data) return;
-
     let [min = 0, max = 100] = getSalary(data);
     salaryMin.value = min;
     salaryMax.value = max;
 
     let currConf = confList.value[activeConfIndex.value];
-
-    let newName = getConfName(data);
-
+    let newName = getConfName(data, currConf?._id);
     if (newName) currConf._name = newName;
 }
 function getSalary(queryParams = '') {
     let { salary } = getMsgFormLink(queryParams, ['salary']);
     return SALARY_RANGE_MAP[salary] || [];
 }
-/** 生成 _id; 若没有 _name，生成它们 */
+/** 向 target 添加 _id, _name */
 function paddCustomData(target, { resetId = false, resetName = false } = {}) {
     let uid = Math.ceil(Math.random() * 1000);
 
     if (!target._id || resetId) target._id = uid;
     if (!target._name || resetName) {
-        target._name = getConfName(target.queryParams) || `配置_${uid}`;
+        target._name = getConfName(target.queryParams, target._id) || `配置_${uid}`;
     }
 
     return target;
 }
-function getConfName(link = '') {
+function getConfName(link = '', uid = 0) {
     if (!link) return '';
 
     // 从链接获取名称, 覆盖默认名称
@@ -552,7 +558,8 @@ function getConfName(link = '') {
         .map(val => DEGREE_MAP[val])
         .join(',');
 
-    let nameFormLink = [query, city, degreeStr, experienceStr, salaryStr].filter(str => str).join('_');
+    let nameFormLink = [uid, query, city, degreeStr, experienceStr, salaryStr].filter(str => str).join('_');
+    console.log('🔎 ~ getConfName ~ nameFormLink:', uid, nameFormLink);
 
     return nameFormLink;
 }
