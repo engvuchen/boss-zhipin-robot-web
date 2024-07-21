@@ -2,7 +2,7 @@ const fs = require('fs');
 const fsPromise = require('fs/promises');
 const path = require('path');
 
-const staticPath = 'dist';
+const staticPath = '../dist';
 
 async function handleStaticResource(ctx, next) {
     if (ctx.path.startsWith('/api')) return await next();
@@ -106,7 +106,7 @@ async function dir(url, reqPath) {
  * @return {array} 目录内容列表
  */
 async function walk(reqPath) {
-    let files = await fs.readdir(reqPath);
+    let files = await fsPromise.readdir(reqPath, () => {});
 
     let dirList = [];
     let fileList = [];
@@ -114,7 +114,7 @@ async function walk(reqPath) {
         let file = files[i];
 
         const filePath = path.join(reqPath, file);
-        const fileStats = await fs.stat(filePath);
+        const fileStats = await fsPromise.stat(filePath);
 
         if (fileStats.isDirectory()) {
             dirList.push(files[i]);
