@@ -67,9 +67,25 @@ Node.js 依赖：16.3+
 
 1. 丰富的筛选条件：打招呼数量、薪酬区间、BOSS 活跃时间、精确技能筛选、屏蔽公司关键词、屏蔽岗位关键词；
 
-2. 支持部分定制部分无头浏览器表现：超时时间、是否观察打招呼过程；
+2. 支持定制部分无头浏览器表现：超时时间、是否观察打招呼过程；
 
-![image-20240705212430814](https://engvu.oss-cn-shenzhen.aliyuncs.com/b0c80eafec9fddd2d65ef12ea641f69c.webp)
+3. 支持管理切换打招呼配置，不同城市、学历等无需自行管理
+
+4. 高校静默运行任务：任务出错提供系统通知，方便及时重启任务
+
+![运行效果](https://engvu.oss-cn-shenzhen.aliyuncs.com/bcda4b51813d18fac909da0484f823b8.webp)
+
+# 开启错误通知
+
+不观察浏览器运行（防止被同事窥屏），通过系统通知及时发现、解决报错问题，提高打招呼效率；
+
+1. chrome 网页上允许通知；
+
+![允许通知](https://engvu.oss-cn-shenzhen.aliyuncs.com/77c2dc68ceb0692329914fd111cdf9f8.webp)
+
+2. 需在系统设置中开启 chrome 通知，以下是 window11 开启的例子：
+
+![window开启通知](https://engvu.oss-cn-shenzhen.aliyuncs.com/bc8ea785614f4f1e574e491eecc9403b.webp)
 
 ## 免责声名
 

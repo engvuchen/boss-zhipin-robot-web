@@ -383,12 +383,11 @@ onMounted(() => {
     onQueryParamsChange(modelRef.value.queryParams);
 });
 
-// Method
 function initWs() {
     // 此处 new ，触发一次 wss connection
     const ip = import.meta.env.BOSS_IP || 'localhost';
     const port = import.meta.env.BOSS_PORT || '3000';
-    let stopKeyWords = ['执行出错', '顺利完成'];
+    let stopKeyWords = ['顺利完成', '执行出错'];
 
     let wss = new WebSocket(`ws://${ip}:${port}`);
     wss.onopen = function (event) {
@@ -488,8 +487,6 @@ async function onSubmit(e) {
         data: sendData,
     });
     waitAutoSendHello.value = false;
-
-    // if (res?.code !== 0) return message.error(res?.msg || '');
 }
 function saveListToStorage() {
     localStorage.setItem('zhipin-robot', JSON.stringify(confList.value));
