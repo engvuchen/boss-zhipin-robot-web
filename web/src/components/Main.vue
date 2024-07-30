@@ -25,6 +25,10 @@
                     <n-button-group class="mr-20">
                         <n-button ghost @click="showManageModal = !showManageModal" style="width: 80px">管理</n-button>
                     </n-button-group>
+                    <n-button-group class="mr-20">
+                        <n-button ghost @click="onImportJson" class="w-80" style="width: 80px">导入</n-button>
+                        <n-button ghost @click="onExportJson" class="w-80" style="width: 80px">导出</n-button>
+                    </n-button-group>
                     <n-button-group>
                         <n-button ghost @click="onCreate('copy')" class="w-80" style="width: 80px">复制</n-button>
                         <n-button ghost @click="onCreate('new')" class="w-80" style="width: 80px">新建草稿</n-button>
@@ -214,6 +218,7 @@ import { useMessage, NInput, NButton } from 'naive-ui';
 import { isFake, deepClone, request, notifyMe } from '@/util';
 const message = useMessage();
 import {
+    STORE_KEY,
     keySkills,
     excludeJobs,
     excludeCompanies,
@@ -411,7 +416,7 @@ function initWs() {
     };
 }
 function getMod() {
-    let list = JSON.parse(localStorage.getItem('zhipin-robot') || '[]');
+    let list = JSON.parse(localStorage.getItem(STORE_KEY) || '[]');
     // 兼容之前只有一个配置
     if (!Array.isArray(list)) {
         list = [list];
@@ -489,7 +494,7 @@ async function onSubmit(e) {
     waitAutoSendHello.value = false;
 }
 function saveListToStorage() {
-    localStorage.setItem('zhipin-robot', JSON.stringify(confList.value));
+    localStorage.setItem(STORE_KEY, JSON.stringify(confList.value));
 }
 
 function onQueryParamsChange(data) {
@@ -552,6 +557,53 @@ function getMsgFormLink(link, list = []) {
         obj[key] = result === null ? '' : result;
         return obj;
     }, {});
+}
+
+// 导入JSON文件
+function onImportJson() {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+
+    fileInput.addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (!file.name.endsWith('.json')) {
+            return message.error('不是JSON文件');
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const content = e.target.result;
+
+            try {
+                const jsonData = JSON.parse(e.target.result);
+
+                let type = Object.prototype.toString.call(jsonData).slice(8, -1);
+                if (!['Array', 'Object'].includes(type)) {
+                    return message.error('内容非合法JSON');
+                }
+
+                localStorage.setItem(STORE_KEY, JSON.stringify(jsonData));
+                modelRef.value = getMod();
+            } catch (error) {
+                console.log('🔎 ~ error:', error);
+                return message.error('内容非合法JSON');
+            }
+        };
+        reader.readAsText(file);
+    });
+
+    fileInput.click();
+}
+// 导出JSON文件
+function onExportJson() {
+    const jsonStr = JSON.stringify(JSON.stringify(localStorage.getItem(STORE_KEY)), null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = '打招呼配置.json';
+
+    link.click();
 }
 </script>
 <style scoped>

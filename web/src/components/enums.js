@@ -1,3 +1,5 @@
+const STORE_KEY = 'zihpin-robot';
+
 // 默认：不投递大厂、屏蔽部分外包公司关键词
 const keySkills = [
     'vue',
@@ -90,7 +92,6 @@ const EXPERIENCE_MAP = {
     107: '10年以上',
 };
 // degree=209,208,206,202,203,204,205
-
 const DEGREE_MAP = {
     209: '初中及以下',
     208: '中专/中技',
@@ -101,6 +102,7 @@ const DEGREE_MAP = {
     205: '博士',
 };
 
+// 只包括热门的几个城市
 const cityList = [
     {
         code: 100010000,
@@ -162,9 +164,18 @@ const cityList = [
         code: 101040100,
         name: '重庆',
     },
+    {
+        code: 101280300,
+        name: '惠州',
+    },
+    {
+        code: 101281700,
+        name: '中山',
+    },
 ];
 
 export {
+    STORE_KEY,
     keySkills,
     excludeCompanies,
     excludeJobs,
