@@ -469,12 +469,7 @@ function onCreate(type = 'new') {
 async function onSubmit(e) {
     e.preventDefault();
 
-    let validErr = await formRef.value?.validate(async errors => {
-        return new Promise(resolve => {
-            if (errors) return resolve(errors);
-            resolve(true);
-        });
-    });
+    let validErr = await validForm();
     if (validErr) {
         console.error('errors', validErr);
         message.error('验证失败');
@@ -492,6 +487,14 @@ async function onSubmit(e) {
         data: sendData,
     });
     waitAutoSendHello.value = false;
+}
+async function validForm() {
+    return new Promise((resolve, reject) => {
+        formRef.value?.validate(errors => {
+            if (errors) return resolve(errors);
+            resolve();
+        });
+    });
 }
 function saveListToStorage() {
     localStorage.setItem(STORE_KEY, JSON.stringify(confList.value));
@@ -572,8 +575,6 @@ function onImportJson() {
 
         const reader = new FileReader();
         reader.onload = function (e) {
-            const content = e.target.result;
-
             try {
                 const jsonData = JSON.parse(e.target.result);
 
@@ -596,13 +597,13 @@ function onImportJson() {
 }
 // 导出JSON文件
 function onExportJson() {
-    const jsonStr = JSON.stringify(JSON.stringify(localStorage.getItem(STORE_KEY)), null, 2);
-    const blob = new Blob([jsonStr], { type: 'application/json' });
-
+    const jsonStr = localStorage.getItem(STORE_KEY);
+    const blob = new Blob([jsonStr], {
+        type: 'application/json',
+    });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = '打招呼配置.json';
-
     link.click();
 }
 </script>
