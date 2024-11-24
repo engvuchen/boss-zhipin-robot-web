@@ -71,7 +71,7 @@ Node.js 依赖：16.3+
 
 3. 支持管理切换打招呼配置，不同城市、学历等无需自行管理
 
-4. 高校静默运行任务：任务出错提供系统通知，方便及时重启任务
+4. 支持静默运行任务：任务出错提供系统通知，方便及时重启任务
 
 ![运行效果](https://engvu.oss-cn-shenzhen.aliyuncs.com/bcda4b51813d18fac909da0484f823b8.webp)
 
@@ -79,7 +79,7 @@ Node.js 依赖：16.3+
 
 不观察浏览器运行（防止被同事窥屏），通过系统通知及时发现、解决报错问题，提高打招呼效率；
 
-1. chrome 网页上允许通知；
+1. chrome 允许网页通知；
 
 ![允许通知](https://engvu.oss-cn-shenzhen.aliyuncs.com/77c2dc68ceb0692329914fd111cdf9f8.webp)
 

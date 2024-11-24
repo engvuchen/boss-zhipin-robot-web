@@ -1,6 +1,6 @@
 <template>
     <n-config-provider :theme="theme">
-        <n-card style="height: 100vh">
+        <n-card style="height: 100%">
             <div class="main">
                 <h2 class="title">BOSS直聘自动打招呼</h2>
                 <n-message-provider>
