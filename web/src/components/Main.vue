@@ -6,7 +6,7 @@
             :model="modelRef"
             :rules="rules"
             label-placement="left"
-            label-width="120"
+            label-width="180"
             :style="{
                 minWidth: '400px',
             }"
@@ -23,15 +23,44 @@
                         @update:value="onConfChange"
                     />
                     <n-button-group class="mr-20">
-                        <n-button ghost @click="showManageModal = !showManageModal" style="width: 80px">管理</n-button>
+                        <n-button
+                            ghost
+                            @click="showManageModal = !showManageModal"
+                            style="width: 80px"
+                            >管理</n-button
+                        >
                     </n-button-group>
                     <n-button-group class="mr-20">
-                        <n-button ghost @click="onImportJson" class="w-80" style="width: 80px">导入</n-button>
-                        <n-button ghost @click="onExportJson" class="w-80" style="width: 80px">导出</n-button>
+                        <n-button
+                            ghost
+                            @click="onImportJson"
+                            class="w-80"
+                            style="width: 80px"
+                            >导入</n-button
+                        >
+                        <n-button
+                            ghost
+                            @click="onExportJson"
+                            class="w-80"
+                            style="width: 80px"
+                            >导出</n-button
+                        >
                     </n-button-group>
                     <n-button-group>
-                        <n-button ghost @click="onCreate('copy')" class="w-80" style="width: 80px">复制</n-button>
-                        <n-button ghost @click="onCreate('new')" class="w-80" style="width: 80px">新建草稿</n-button>
+                        <n-button
+                            ghost
+                            @click="onCreate('copy')"
+                            class="w-80"
+                            style="width: 80px"
+                            >复制</n-button
+                        >
+                        <n-button
+                            ghost
+                            @click="onCreate('new')"
+                            class="w-80"
+                            style="width: 80px"
+                            >新建草稿</n-button
+                        >
                     </n-button-group>
                 </div>
             </n-form-item>
@@ -50,7 +79,11 @@
             </n-form-item>
             <!-- helloTxt -->
             <n-form-item path="helloTxt" label="招呼语">
-                <n-input v-model:value="modelRef.helloTxt" type="textarea" style="height: 8rem" />
+                <n-input
+                    v-model:value="modelRef.helloTxt"
+                    type="textarea"
+                    style="height: 8rem"
+                />
             </n-form-item>
             <!-- wt2Cookie -->
             <n-form-item path="wt2Cookie" label="Cookie（wt2）">
@@ -80,7 +113,13 @@
                 label="超时（秒）"
                 feedback="选择器、资源等待时间。出现资源、选择器问题，建议增大后重试"
             >
-                <n-slider v-model:value="modelRef.timeout" :step="1" :min="5" :max="30" style="width: 280px" />
+                <n-slider
+                    v-model:value="modelRef.timeout"
+                    :step="1"
+                    :min="5"
+                    :max="30"
+                    style="width: 280px"
+                />
             </n-form-item>
             <!-- 精确筛选条件 -->
             <!-- salaryRange -->
@@ -104,23 +143,32 @@
                     <n-select
                         v-model:value="modelRef.bossActiveType"
                         :options="
-                            bossActiveOptions.map(curr => ({
+                            bossActiveOptions.map((curr) => ({
                                 label: curr,
                                 value: curr,
                             }))
                         "
                     />
-                    <div class="help">仅投递 BOSS 在指定时间内有活跃的岗位，活跃时间不存在也不投递</div>
+                    <div class="help">
+                        仅投递 BOSS
+                        在指定时间内有活跃的岗位，活跃时间不存在也不投递
+                    </div>
                 </div>
             </n-form-item>
             <!-- keySkills -->
-            <n-form-item path="keySkills" label="精确技能筛选" feedback="岗位详情需匹配此处的每一个技能">
+            <n-form-item
+                path="keySkills"
+                label="精确技能筛选"
+                feedback="岗位详情需匹配此处的每一个技能"
+            >
                 <n-select
                     v-model:value="modelRef.keySkills"
                     filterable
                     multiple
                     tag
-                    :options="keySkills.map(curr => ({ label: curr, value: curr }))"
+                    :options="
+                        keySkills.map((curr) => ({ label: curr, value: curr }))
+                    "
                 />
             </n-form-item>
             <!-- excludeCompanies -->
@@ -134,34 +182,75 @@
                         :options="excludeCompanies"
                         class="mb-4"
                     />
-                    <div class="help">若公司名包含此处的任意一个关键词，则被过滤；忽略大小写</div>
+                    <div class="help">
+                        若公司名包含此处的任意一个关键词，则被过滤；忽略大小写
+                    </div>
+                </div>
+            </n-form-item>
+            <!-- excludeJobNames -->
+            <n-form-item path="excludeJobNames" label="屏蔽岗位名关键词">
+                <div class="flex flex-column">
+                    <n-select
+                        v-model:value="modelRef.excludeJobNames"
+                        filterable
+                        multiple
+                        tag
+                        :options="
+                            excludeJobNames.map((curr) => ({
+                                label: curr,
+                                value: curr,
+                            }))
+                        "
+                    />
+                    <div class="help">
+                        若岗位名包含此处的任意一个关键词，则被过滤
+                    </div>
                 </div>
             </n-form-item>
             <!-- excludeJobs -->
-            <n-form-item path="excludeJobs" label="屏蔽岗位关键词">
+            <n-form-item path="excludeJobs" label="屏蔽岗位详情关键词">
                 <div class="flex flex-column">
                     <n-select
                         v-model:value="modelRef.excludeJobs"
                         filterable
                         multiple
                         tag
-                        :options="excludeJobs.map(curr => ({ label: curr, value: curr }))"
+                        :options="
+                            excludeJobs.map((curr) => ({
+                                label: curr,
+                                value: curr,
+                            }))
+                        "
                     />
                     <div class="help">
-                        若岗位名、岗位详情包含此处的任意一个关键词，则被过滤；比“精确技能筛选”优先，忽略大小写
+                        若岗位详情包含此处的任意一个关键词，则被过滤；比“精确技能筛选”优先，忽略大小写
                     </div>
                 </div>
             </n-form-item>
             <!-- headless -->
             <n-form-item path="headless" label="观察打招呼过程">
-                <n-switch v-model:value="modelRef.headless" :checked-value="false" unchecked-value="new" />
+                <n-switch
+                    v-model:value="modelRef.headless"
+                    :checked-value="false"
+                    unchecked-value="new"
+                />
             </n-form-item>
             <!-- 按钮组 -->
             <n-form-item>
                 <div class="flex flex-column align-end" style="width: 100%">
                     <div class="btn-group flex justify-end" style="width: 100%">
-                        <n-button @click="saveListToStorage" class="mr-20" style="width: 80px">保存</n-button>
-                        <n-button type="primary" :disabled="btnDisabled" @click="onSubmit">启动任务</n-button>
+                        <n-button
+                            @click="saveListToStorage"
+                            class="mr-20"
+                            style="width: 80px"
+                            >保存</n-button
+                        >
+                        <n-button
+                            type="primary"
+                            :disabled="btnDisabled"
+                            @click="onSubmit"
+                            >启动任务</n-button
+                        >
                     </div>
                     <!-- <div class="help mt-8">若配置有变动（名称、别名除外），“保存”、“启动任务”会尝试新建一个配置</div> -->
                 </div>
@@ -187,7 +276,14 @@
         </n-form>
         <!-- 模态框-配置管理 -->
         <n-modal :show="showManageModal" :auto-focus="false">
-            <n-card style="width: 900px" title="管理" size="huge" :bordered="false" role="dialog" aria-modal="true">
+            <n-card
+                style="width: 900px"
+                title="管理"
+                size="huge"
+                :bordered="false"
+                role="dialog"
+                aria-modal="true"
+            >
                 <n-data-table
                     :bordered="true"
                     :single-line="true"
@@ -196,17 +292,23 @@
                     :pagination="{
                         pageSize: 10,
                     }"
-                    :row-key="row => row._id"
+                    :row-key="(row) => row._id"
                     :row-class-name="
-                        row => {
+                        (row) => {
                             if (row._active) return 'light';
                             return '';
                         }
                     "
                 />
                 <div class="flex justify-center">
-                    <n-button @click="showManageModal = !showManageModal" class="mr-20">关闭</n-button>
-                    <n-button type="primary" @click="saveListToStorage">保存</n-button>
+                    <n-button
+                        @click="showManageModal = !showManageModal"
+                        class="mr-20"
+                        >关闭</n-button
+                    >
+                    <n-button type="primary" @click="saveListToStorage"
+                        >保存</n-button
+                    >
                 </div>
             </n-card>
         </n-modal>
@@ -221,6 +323,7 @@ import {
     STORE_KEY,
     keySkills,
     excludeJobs,
+    excludeJobNames,
     excludeCompanies,
     bossActiveOptions,
     defaultValues,
@@ -258,7 +361,7 @@ const rules = {
 };
 let requiredNames = Object.keys(rules).reduce((accu, key) => {
     let list = rules[key];
-    if (list.some(item => item.required)) {
+    if (list.some((item) => item.required)) {
         accu.push(key);
     }
     return accu;
@@ -282,7 +385,7 @@ watch(
             confSelectOpts.value = [{ label: '暂无配置', value: 0 }];
         }
 
-        let index = newConfList.findIndex(curr => curr._active);
+        let index = newConfList.findIndex((curr) => curr._active);
         activeConfIndex.value = index > -1 ? index : 0;
     },
     { deep: true }
@@ -307,7 +410,10 @@ const modelRef = ref(getMod());
 const showManageModal = ref(false);
 let waitAutoSendHello = ref(false);
 const btnDisabled = computed(() => {
-    return requiredNames.some(key => isFake(modelRef.value[key])) || waitAutoSendHello.value;
+    return (
+        requiredNames.some((key) => isFake(modelRef.value[key])) ||
+        waitAutoSendHello.value
+    );
 });
 // 薪水
 const salaryMin = ref(0);
@@ -344,7 +450,7 @@ const columns = [
                 onUpdateValue(v) {
                     let list = confList.value;
 
-                    let found = list.find(curr => curr._id === row._id);
+                    let found = list.find((curr) => curr._id === row._id);
                     if (found) found._alias = v;
                 },
             });
@@ -363,11 +469,11 @@ const columns = [
                     onClick: () => {
                         let list = confList.value;
                         list.splice(
-                            list.findIndex(curr => curr._id === row._id),
+                            list.findIndex((curr) => curr._id === row._id),
                             1
                         );
                         if (confList.value.length) {
-                            if (!confList.value.find(curr => curr._active)) {
+                            if (!confList.value.find((curr) => curr._active)) {
                                 confList.value[0]._active = true;
                                 modelRef.value = confList.value[0];
                             }
@@ -398,10 +504,10 @@ function initWs() {
     wss.onopen = function (event) {
         console.log('WebSocket is open now.');
     };
-    wss.onmessage = async event => {
+    wss.onmessage = async (event) => {
         messageList.value.push(event.data);
 
-        let foundKey = stopKeyWords.find(key => event.data.includes(key));
+        let foundKey = stopKeyWords.find((key) => event.data.includes(key));
         if (foundKey) {
             notifyMe(foundKey, {
                 body: event.data,
@@ -411,7 +517,8 @@ function initWs() {
         await nextTick();
         // textareaElRef 是组件内的 ref
         if (serverLogsNode.value?.textareaElRef.scrollHeight) {
-            serverLogsNode.value.textareaElRef.scrollTop = serverLogsNode.value?.textareaElRef.scrollHeight;
+            serverLogsNode.value.textareaElRef.scrollTop =
+                serverLogsNode.value?.textareaElRef.scrollHeight;
         }
     };
 }
@@ -422,7 +529,9 @@ function getMod() {
         list = [list];
     }
     if (!list.length) {
-        let newConf = paddCustomData(deepClone(defaultValues), { resetName: true });
+        let newConf = paddCustomData(deepClone(defaultValues), {
+            resetName: true,
+        });
         newConf._active = true;
         confList.value = [newConf];
         return newConf;
@@ -450,7 +559,8 @@ function getMod() {
 }
 
 function onCreate(type = 'new') {
-    let data = type === 'new' ? deepClone(defaultValues) : deepClone(modelRef.value);
+    let data =
+        type === 'new' ? deepClone(defaultValues) : deepClone(modelRef.value);
 
     delete data._alias;
     data._active = true;
@@ -461,7 +571,7 @@ function onCreate(type = 'new') {
     });
     if (type === 'copy') data._name = `${data._name}_1`;
 
-    confList.value.forEach(curr => delete curr._active);
+    confList.value.forEach((curr) => delete curr._active);
     confList.value.unshift(data);
 
     modelRef.value = data;
@@ -490,7 +600,7 @@ async function onSubmit(e) {
 }
 async function validForm() {
     return new Promise((resolve, reject) => {
-        formRef.value?.validate(errors => {
+        formRef.value?.validate((errors) => {
             if (errors) return resolve(errors);
             resolve();
         });
@@ -519,7 +629,8 @@ function paddCustomData(target, { resetId = false, resetName = false } = {}) {
 
     if (!target._id || resetId) target._id = uid;
     if (!target._name || resetName) {
-        target._name = getConfName(target.queryParams, target._id) || `配置_${uid}`;
+        target._name =
+            getConfName(target.queryParams, target._id) || `配置_${uid}`;
     }
 
     return target;
@@ -534,22 +645,32 @@ function getConfName(link = '', uid = 0) {
         degree = '学历不限',
         experience = '经验不限',
         salary = '薪资不限',
-    } = getMsgFormLink(link, ['query', 'city', 'degree', 'experience', 'salary']);
+    } = getMsgFormLink(link, [
+        'query',
+        'city',
+        'degree',
+        'experience',
+        'salary',
+    ]);
 
-    city = cityList.find(curr => curr.code === +city)?.name || city;
+    city = cityList.find((curr) => curr.code === +city)?.name || city;
 
     let experienceStr = experience
         .split(',')
-        .map(val => EXPERIENCE_MAP[val])
+        .map((val) => EXPERIENCE_MAP[val])
         .join(',');
-    let salaryStr = SALARY_RANGE_MAP[salary]?.map(str => `${str}K`)?.join('-'); // 薪水只能选一个
+    let salaryStr = SALARY_RANGE_MAP[salary]
+        ?.map((str) => `${str}K`)
+        ?.join('-'); // 薪水只能选一个
 
     let degreeStr = degree
         .split(',')
-        .map(val => DEGREE_MAP[val])
+        .map((val) => DEGREE_MAP[val])
         .join(',');
 
-    let nameFormLink = [uid, query, city, degreeStr, experienceStr, salaryStr].filter(str => str).join('_');
+    let nameFormLink = [uid, query, city, degreeStr, experienceStr, salaryStr]
+        .filter((str) => str)
+        .join('_');
     return nameFormLink;
 }
 function getMsgFormLink(link, list = []) {
@@ -578,7 +699,9 @@ function onImportJson() {
             try {
                 const jsonData = JSON.parse(e.target.result);
 
-                let type = Object.prototype.toString.call(jsonData).slice(8, -1);
+                let type = Object.prototype.toString
+                    .call(jsonData)
+                    .slice(8, -1);
                 if (!['Array', 'Object'].includes(type)) {
                     return message.error('内容非合法JSON');
                 }

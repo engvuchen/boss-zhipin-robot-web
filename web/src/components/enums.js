@@ -35,7 +35,10 @@ const defaultExcludeCompanies = [
     '人力资源',
     '信息技术',
 ];
-const excludeCompanies = defaultExcludeCompanies.map(name => ({ label: name, value: name }));
+const excludeCompanies = defaultExcludeCompanies.map((name) => ({
+    label: name,
+    value: name,
+}));
 // 工作名屏蔽
 const excludeJobs = [
     'flutter',
@@ -55,7 +58,13 @@ const excludeJobs = [
     '派遣',
     '外包',
 ];
-const bossActiveOptions = ['1个月内活跃', '3个月内活跃', '半年内活跃', '无限制'];
+const excludeJobNames = JSON.parse(JSON.stringify(excludeJobs));
+const bossActiveOptions = [
+    '1个月内活跃',
+    '3个月内活跃',
+    '半年内活跃',
+    '无限制',
+];
 
 let defaultValues = {
     queryParams: 'https://www.zhipin.com/web/geek/job',
@@ -69,6 +78,7 @@ let defaultValues = {
     bossActiveType: '3个月内活跃',
     excludeCompanies: defaultExcludeCompanies,
     excludeJobs: ['外包', '派遣'],
+    excludeJobNames: ['外包', '派遣'],
     headless: false,
 };
 
@@ -179,6 +189,7 @@ export {
     keySkills,
     excludeCompanies,
     excludeJobs,
+    excludeJobNames,
     bossActiveOptions,
     defaultValues,
     SALARY_RANGE_MAP,
