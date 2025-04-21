@@ -275,14 +275,16 @@
             </n-form-item>
         </n-form>
         <!-- 模态框-配置管理 -->
-        <n-modal :show="showManageModal" :auto-focus="false">
+        <n-modal
+            v-model:show="showManageModal"
+            :auto-focus="false"
+            :close-on-esc="true"
+        >
             <n-card
                 style="width: 900px"
                 title="管理"
                 size="huge"
                 :bordered="false"
-                role="dialog"
-                aria-modal="true"
             >
                 <n-data-table
                     :bordered="true"
