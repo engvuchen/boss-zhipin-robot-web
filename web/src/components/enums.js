@@ -183,6 +183,52 @@ const cityList = [
         name: '中山',
     },
 ];
+const syncConf = [
+    {
+        label: '招呼语',
+        value: 'helloTxt',
+    },
+    {
+        label: 'Cookie（wt2）',
+        value: 'wt2Cookie',
+    },
+    {
+        label: '打招呼数量',
+        value: 'targetNum',
+    },
+    {
+        label: '超时（秒）',
+        value: 'timeout',
+    },
+    {
+        label: '薪酬区间（K）',
+        value: 'salaryRange',
+    },
+    {
+        label: ' BOSS 活跃时间筛选',
+        value: 'bossActiveType',
+    },
+    {
+        label: '精确技能筛选',
+        value: 'keySkills',
+    },
+    {
+        label: '屏蔽公司关键词',
+        value: 'excludeCompanies',
+    },
+    {
+        label: '屏蔽岗位名关键词',
+        value: 'excludeJobNames',
+    },
+    {
+        label: '屏蔽岗位详情关键词',
+        value: 'excludeJobs',
+    },
+    {
+        label: '观察打招呼过程',
+        value: 'headless',
+    },
+];
 
 export {
     STORE_KEY,
@@ -196,4 +242,5 @@ export {
     EXPERIENCE_MAP,
     DEGREE_MAP,
     cityList,
+    syncConf,
 };

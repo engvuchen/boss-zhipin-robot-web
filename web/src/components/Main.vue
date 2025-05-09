@@ -239,6 +239,26 @@
             <n-form-item>
                 <div class="flex flex-column align-end" style="width: 100%">
                     <div class="btn-group flex justify-end" style="width: 100%">
+                        <n-popconfirm
+                            class="mr-20"
+                            @positive-click="handlePositiveClick"
+                            @negative-click="handleNegativeClick"
+                        >
+                            <template #trigger>
+                                <n-button>同步</n-button>
+                            </template>
+                            <div style="display: flex; flex-direction: column">
+                                <div>将当前配置同步到其他配置，确认？</div>
+                                <n-select
+                                    v-model:value="syncNames"
+                                    filterable
+                                    multiple
+                                    tag
+                                    style="width: 300px"
+                                    :options="syncConf"
+                                />
+                            </div>
+                        </n-popconfirm>
                         <n-button
                             @click="saveListToStorage"
                             class="mr-20"
@@ -333,6 +353,7 @@ import {
     EXPERIENCE_MAP,
     DEGREE_MAP,
     cityList,
+    syncConf,
 } from './enums';
 
 // 普通数据
@@ -432,6 +453,20 @@ const messageList = ref([]);
 const messageListStr = computed(() => {
     return messageList.value.join('\n');
 });
+// 同步配置
+const syncNames = ref([
+    'helloTxt',
+    'wt2Cookie',
+    'targetNum',
+    'timeout',
+    'salaryRange',
+    'bossActiveType',
+    'keySkills',
+    'excludeCompanies',
+    'excludeJobNames',
+    'excludeJobs',
+    'headless',
+]);
 
 // 表格
 const columns = [
