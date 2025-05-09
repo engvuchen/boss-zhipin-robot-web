@@ -19,7 +19,8 @@ import {
     NConfigProvider,
     NModal,
     NDataTable,
-    NPopconfirm
+    NPopover,
+    NIcon,
 } from 'naive-ui';
 
 const naive = create({
@@ -39,7 +40,8 @@ const naive = create({
         NConfigProvider,
         NModal,
         NDataTable,
-        NPopconfirm
+        NPopover,
+        NIcon,
     ],
 });
 

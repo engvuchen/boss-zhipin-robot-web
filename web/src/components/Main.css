@@ -35,6 +35,9 @@
 .align-end {
     align-items: flex-end;
 }
+.align-center {
+    align-items: center;
+}
 .mb-4 {
     margin-bottom: 4px;
 }

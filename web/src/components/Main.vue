@@ -239,28 +239,54 @@
             <n-form-item>
                 <div class="flex flex-column align-end" style="width: 100%">
                     <div class="btn-group flex justify-end" style="width: 100%">
-                        <n-popconfirm
-                            class="mr-20"
-                            @positive-click="handlePositiveClick"
-                            @negative-click="handleNegativeClick"
+                        <n-popover
+                            v-model:show="syncPopoverShow"
+                            trigger="click"
                         >
                             <template #trigger>
-                                <n-button>同步</n-button>
+                                <n-button class="mr-20">同步</n-button>
                             </template>
-                            <div style="display: flex; flex-direction: column">
-                                <div>将当前配置同步到其他配置，确认？</div>
+                            <template #header>
+                                <div class="flex align-center">
+                                    <n-icon
+                                        :component="AlertCircle"
+                                        size="20"
+                                        color="#e3a342"
+                                        style="margin-right: 6px"
+                                    />
+                                    <div>将当前配置同步到其他配置，确认？</div>
+                                </div>
+                            </template>
+                            <div class="flex flex-column">
                                 <n-select
                                     v-model:value="syncNames"
                                     filterable
                                     multiple
                                     tag
-                                    style="width: 300px"
+                                    style="width: 800px"
                                     :options="syncConf"
                                 />
                             </div>
-                        </n-popconfirm>
+                            <template #footer>
+                                <div class="flex justify-end">
+                                    <n-button
+                                        @click="syncPopoverShow = false"
+                                        class="mr-20"
+                                        style="width: 80px"
+                                        >取消</n-button
+                                    >
+                                    <n-button
+                                        @click="syncCurrConfToOthers"
+                                        class="mr-20"
+                                        style="width: 80px"
+                                        type="primary"
+                                        >确认</n-button
+                                    >
+                                </div>
+                            </template>
+                        </n-popover>
                         <n-button
-                            @click="saveListToStorage"
+                            @click="saveListToStorage({ tip: true })"
                             class="mr-20"
                             style="width: 80px"
                             >保存</n-button
@@ -272,7 +298,6 @@
                             >启动任务</n-button
                         >
                     </div>
-                    <!-- <div class="help mt-8">若配置有变动（名称、别名除外），“保存”、“启动任务”会尝试新建一个配置</div> -->
                 </div>
             </n-form-item>
         </n-form>
@@ -323,13 +348,8 @@
                     "
                 />
                 <div class="flex justify-center">
-                    <n-button
-                        @click="showManageModal = !showManageModal"
-                        class="mr-20"
+                    <n-button @click="showManageModal = !showManageModal"
                         >关闭</n-button
-                    >
-                    <n-button type="primary" @click="saveListToStorage"
-                        >保存</n-button
                     >
                 </div>
             </n-card>
@@ -338,7 +358,9 @@
 </template>
 <script setup>
 import { ref, watch, computed, onMounted, nextTick, h } from 'vue';
-import { useMessage, NInput, NButton } from 'naive-ui';
+import { useMessage, NInput, NButton, NPopconfirm } from 'naive-ui';
+import { AlertCircle } from '@vicons/ionicons5';
+
 import { isFake, deepClone, request, notifyMe } from '@/util';
 const message = useMessage();
 import {
@@ -454,6 +476,7 @@ const messageListStr = computed(() => {
     return messageList.value.join('\n');
 });
 // 同步配置
+const syncPopoverShow = ref(false);
 const syncNames = ref([
     'helloTxt',
     'wt2Cookie',
@@ -498,12 +521,11 @@ const columns = [
         key: 'opts',
         render(row, index) {
             return h(
-                NButton,
+                NPopconfirm,
                 {
-                    type: 'warning',
-                    size: 'small',
-                    quaternary: true,
-                    onClick: () => {
+                    negativeText: '取消',
+                    positiveText: '确认',
+                    onPositiveClick: () => {
                         let list = confList.value;
                         list.splice(
                             list.findIndex((curr) => curr._id === row._id),
@@ -519,7 +541,19 @@ const columns = [
                         }
                     },
                 },
-                { default: () => '删除' }
+                {
+                    trigger: () =>
+                        h(
+                            NButton,
+                            {
+                                size: 'small',
+                                type: 'warning',
+                                quaternary: true,
+                            },
+                            '删除'
+                        ),
+                    default: () => '确认删除？',
+                }
             );
         },
     },
@@ -643,8 +677,22 @@ async function validForm() {
         });
     });
 }
-function saveListToStorage() {
+function saveListToStorage({ tip = true } = {}) {
     localStorage.setItem(STORE_KEY, JSON.stringify(confList.value));
+    if (tip) message.success('成功');
+}
+function syncCurrConfToOthers() {
+    let currConf = confList.value[activeConfIndex.value];
+
+    syncNames.value.forEach((name) => {
+        confList.value.forEach((item) => {
+            item[name] = currConf[name];
+        });
+    });
+
+    saveListToStorage();
+
+    syncPopoverShow.value = false;
 }
 
 function onQueryParamsChange(data) {
