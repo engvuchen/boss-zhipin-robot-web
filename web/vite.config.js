@@ -13,7 +13,10 @@ export default defineConfig({
             name: 'Cleaning assets folder',
             async buildStart() {
                 if (process.env.NODE_ENV === 'production') {
-                    await rm(resolve(__dirname, '../dist/assets'), { recursive: true, force: true });
+                    await rm(resolve(__dirname, '../dist/assets'), {
+                        recursive: true,
+                        force: true,
+                    });
                 }
             },
         },
@@ -22,6 +25,7 @@ export default defineConfig({
         alias: {
             '@': fileURLToPath(new URL('./src', import.meta.url)),
         },
+        // extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json'],
     },
     define: {
         'import.meta.env.BOSS_IP': JSON.stringify(process.env.BOSS_IP),

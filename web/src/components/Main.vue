@@ -659,7 +659,7 @@ async function onSubmit(e) {
 
     let sendData = deepClone(modelRef._value);
 
-    saveListToStorage();
+    saveListToStorage({ tip: false });
 
     waitAutoSendHello.value = true;
     await request({
